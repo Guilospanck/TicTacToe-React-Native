@@ -24,17 +24,17 @@ const GLOBALS = {
         primaryDark: '#3700B3',
         secondary: '#03DAC5'
     },
-    storeDarkModeData: async function(value) {
+    storeData: async function(key, value) {
         try{
-            await AsyncStorage.setItem('dark_mode', JSON.stringify(value));
+            await AsyncStorage.setItem(key, JSON.stringify(value));
         } catch (e){
             console.log(e);            
         }
     },
-    getDarkModeData: async function() {
+    getStoreData: async function(key) {
         let value = false;
         try {
-            value = await AsyncStorage.getItem('dark_mode') || false;
+            value = await AsyncStorage.getItem(key) || false;
         } catch (e) {
             console.log(e);            
         }

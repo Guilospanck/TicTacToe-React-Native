@@ -6,6 +6,8 @@ import {
     TouchableOpacity
 } from 'react-native'
 
+import { Actions } from "react-native-router-flux";
+
 import GLOBALS from './Globals'
 
 export default class Home extends Component {
@@ -14,28 +16,39 @@ export default class Home extends Component {
         this.state = {
             isDarkMode: false
         }
-        GLOBALS.getDarkModeData().then((value) => {
+        GLOBALS.getStoreData('darkMode').then((value) => {
+            this.setState({
+                isDarkMode: value
+            });
+        });
+        GLOBALS.storeData('isInGame', false);
+    }
+
+    componentDidUpdate() {
+        GLOBALS.getStoreData('darkMode').then((value) => {
             this.setState({
                 isDarkMode: value
             });
         });
     }
 
-    componentDidUpdate() {
-        GLOBALS.getDarkModeData().then((value) => {
-            this.setState({
-                isDarkMode: value
-            });
+    onGameModeSelector = () => {
+        Actions.game({
+            gameMode: 'teste'
         });
     }
 
     render() {
         return (
             <View style={this.state.isDarkMode ? stylesDarkMode.container : stylesLightMode.container}>
-                <TouchableOpacity style={this.state.isDarkMode ? stylesDarkMode.versusAi : stylesLightMode.versusAi}>
+                <TouchableOpacity 
+                style={this.state.isDarkMode ? stylesDarkMode.versusAi : stylesLightMode.versusAi}
+                onPress={()=>this.onGameModeSelector()}>
                     <Text style={this.state.isDarkMode ? stylesDarkMode.Text : stylesLightMode.Text}>AI</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={this.state.isDarkMode ? stylesDarkMode.versusPerson : stylesLightMode.versusPerson}>
+                <TouchableOpacity 
+                style={this.state.isDarkMode ? stylesDarkMode.versusPerson : stylesLightMode.versusPerson}
+                onPress={()=>this.onGameModeSelector()}>
                     <Text style={this.state.isDarkMode ? stylesDarkMode.Text : stylesLightMode.Text}>Person</Text>
                 </TouchableOpacity>
             </View>

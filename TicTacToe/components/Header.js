@@ -14,25 +14,40 @@ export default class Header extends Component {
     constructor() {
         super();
         this.state = {
-            switchValue: false
+            switchValue: false,
+            isInGame: false
         }
-        GLOBALS.getDarkModeData().then((value) => {
+        GLOBALS.getStoreData('darkMode').then((value) => {
             this.setState({
                 switchValue: value
             });
-        });        
+        });
+        GLOBALS.getStoreData('isInGame').then((value) => {
+            this.setState({
+                isInGame: value
+            });
+        });
+        console.log(this.setState.isInGame);
     }
 
+    
     toggleSwitch = (value) => {
         this.setState({
             switchValue: value
         });
-        GLOBALS.storeDarkModeData(value);
-    }    
+        GLOBALS.storeData('darkMode', value);
+    }
 
     render() {
         return (
             <View style={styles.container}>
+                <View>
+                    {this.state.isInGame &&
+                        <TouchableOpacity>
+                            <Text style={styles.day}>BACK</Text>
+                        </TouchableOpacity>
+                    }
+                </View>
                 <Text style={styles.title}>
                     Tic Tac Toe
                 </Text>

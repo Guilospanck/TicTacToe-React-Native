@@ -15,11 +15,17 @@ import {
   StatusBar,
 } from 'react-native';
 
+import {
+  Router,
+  Scene
+} from 'react-native-router-flux';
+
 import Header from "./components/Header";
 import Home from "./components/Home"
+import Game from "./components/Game"
 
 class App extends Component {
-  constructor(props){
+  constructor(props) {
     super(props);
   }
   render() {
@@ -28,9 +34,14 @@ class App extends Component {
         <StatusBar backgroundColor="#3700B3" />
         <Header />
         <View style={styles.container}>
-          <Home />
+          <Router>
+            <Scene key="root" headerMode="none">
+              <Scene key="home" component={Home} />
+              <Scene key="game" component={Game} />
+            </Scene>
+          </Router>
         </View>
-      </Fragment>
+      </Fragment >
     );
   }
 
