@@ -9,12 +9,24 @@ import {
 import GLOBALS from './Globals'
 
 export default class Home extends Component {
-    constructor(){
+    constructor() {
         super();
         this.state = {
-            isDarkMode: true
+            isDarkMode: false
         }
-        console.log(GLOBALS.STYLES.versusAiAndPerson);        
+        GLOBALS.getDarkModeData().then((value) => {
+            this.setState({
+                isDarkMode: value
+            });
+        });
+    }
+
+    componentDidUpdate() {
+        GLOBALS.getDarkModeData().then((value) => {
+            this.setState({
+                isDarkMode: value
+            });
+        });
     }
 
     render() {
@@ -39,14 +51,16 @@ const stylesLightMode = StyleSheet.create({
         alignItems: "center"
     },
     versusAi: {
-        ...GLOBALS.STYLES.versusAiAndPerson,...{   
-        marginBottom: 10,
-        backgroundColor: 'white'   
-    }},
+        ...GLOBALS.STYLES.versusAiAndPerson, ...{
+            marginBottom: 10,
+            backgroundColor: 'white'
+        }
+    },
     versusPerson: {
-        ...GLOBALS.STYLES.versusAiAndPerson,...{
-        backgroundColor: 'white'
-    }},
+        ...GLOBALS.STYLES.versusAiAndPerson, ...{
+            backgroundColor: 'white'
+        }
+    },
     Text: {
         fontSize: 20,
         color: GLOBALS.LIGHT_MODE.textColor
@@ -58,17 +72,19 @@ const stylesDarkMode = StyleSheet.create({
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
-        backgroundColor: '#515052'
+        backgroundColor: GLOBALS.DARK_MODE.primaryLight
     },
     versusAi: {
-        ...GLOBALS.STYLES.versusAiAndPerson,...{
-        backgroundColor: GLOBALS.DARK_MODE.primaryLighter,
-        marginBottom: 10
-    }},
+        ...GLOBALS.STYLES.versusAiAndPerson, ...{
+            backgroundColor: GLOBALS.DARK_MODE.primaryLighter,
+            marginBottom: 10
+        }
+    },
     versusPerson: {
-        ...GLOBALS.STYLES.versusAiAndPerson,...{
-        backgroundColor: GLOBALS.DARK_MODE.primaryLighter
-    }},
+        ...GLOBALS.STYLES.versusAiAndPerson, ...{
+            backgroundColor: GLOBALS.DARK_MODE.primaryLighter
+        }
+    },
     Text: {
         fontSize: 20,
         color: GLOBALS.DARK_MODE.textColor

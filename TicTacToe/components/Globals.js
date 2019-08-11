@@ -1,3 +1,6 @@
+
+import AsyncStorage from '@react-native-community/async-storage';
+
 const GLOBALS = {
     STYLES: {
         versusAiAndPerson: {
@@ -20,6 +23,22 @@ const GLOBALS = {
         primaryLight: '#6200EE',
         primaryDark: '#3700B3',
         secondary: '#03DAC5'
+    },
+    storeDarkModeData: async function(value) {
+        try{
+            await AsyncStorage.setItem('dark_mode', JSON.stringify(value));
+        } catch (e){
+            console.log(e);            
+        }
+    },
+    getDarkModeData: async function() {
+        let value = false;
+        try {
+            value = await AsyncStorage.getItem('dark_mode') || false;
+        } catch (e) {
+            console.log(e);            
+        }
+        return JSON.parse(value);
     }
 };
 export default GLOBALS;
