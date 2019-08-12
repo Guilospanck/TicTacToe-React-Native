@@ -11,7 +11,7 @@ import {
     Actions
 } from 'react-native-router-flux';
 
-import Icon from 'react-native-vector-icons/Ionicons'
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 import GLOBALS from './Globals'
 
@@ -57,7 +57,12 @@ export default class Header extends Component {
                 <View>
                     {this.state.isInGame ? (
                         <TouchableOpacity onPress={() => this.goBack()}>
-                            <Icon name="ios-arrow-round-back" style={styles.arrowBack}/>
+                            <Icon
+                                name='chevron-left'
+                                size={30}
+                                color='white'
+                                style={styles.arrowBack}
+                            />
                         </TouchableOpacity>
                     )
                         : (
@@ -71,7 +76,12 @@ export default class Header extends Component {
                 <View style={styles.toggle}>
                     <View>
                         <TouchableOpacity onPress={() => this.toggleSwitch(false)}>
-                            <Text style={styles.day}>☀</Text>
+                            {/* <Text style={styles.day}>☀</Text> */}
+                            <Icon
+                                name='sun-o'
+                                size={25}
+                                color='white'                                
+                            />
                         </TouchableOpacity>
                     </View>
                     <View>
@@ -84,7 +94,12 @@ export default class Header extends Component {
                     </View>
                     <View>
                         <TouchableOpacity onPress={() => this.toggleSwitch(true)}>
-                            <Text style={styles.night}>☾</Text>
+                            {/* <Text style={styles.night}>☾</Text> */}                            
+                            <Icon
+                                name='moon-o'
+                                size={25}
+                                color='black'                                
+                            />
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -122,21 +137,8 @@ const styles = StyleSheet.create({
         alignItems: "center",
         marginRight: 10
     },
-    night: {
-        fontSize: 25,
-        textAlign: 'center',
-        fontWeight: 'bold',
-        color: GLOBALS.DARK_MODE.primaryDark
-    },
-    day: {
-        fontSize: 20,
-        textAlign: 'center',
-        fontWeight: 'bold',
-        color: GLOBALS.DARK_MODE.primaryDark
-    },
     arrowBack: {
-        fontSize: 50,
-        color: 'white',
-        marginLeft: 10
+        marginLeft: 10,
+        marginTop: 10
     }
 })

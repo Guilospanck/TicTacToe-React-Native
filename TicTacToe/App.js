@@ -23,6 +23,7 @@ import {
 import Header from "./components/Header";
 import Home from "./components/Home"
 import Game from "./components/Game"
+import Persons from "./components/Persons";
 
 class App extends Component {
   constructor(props) {
@@ -37,6 +38,7 @@ class App extends Component {
             <Scene key="root" headerMode="screen" navBar={Header}>
               <Scene key="home" component={Home} />
               <Scene key="game" component={Game} />
+              <Scene key="persons" component={Persons} />
             </Scene>
           </Router>
         </View>

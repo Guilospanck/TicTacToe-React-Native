@@ -29,10 +29,17 @@ export default class Home extends Component {
         GLOBALS.storeData('isInGame', false);
     }
 
-    onGameModeSelector = () => {
-        Actions.game({
-            gameMode: 'teste'
-        });
+    onGameModeSelector = (value) => {
+        if(value === 'AI'){
+            Actions.game({
+                gameMode: 'AI'
+            });
+        } else {
+            Actions.persons({
+                hello: 'Versus'
+            })
+        }
+        
     }
 
     render() {
@@ -40,12 +47,12 @@ export default class Home extends Component {
             <View style={this.state.isDarkMode ? stylesDarkMode.container : stylesLightMode.container}>
                 <TouchableOpacity
                     style={this.state.isDarkMode ? stylesDarkMode.versusAi : stylesLightMode.versusAi}
-                    onPress={() => this.onGameModeSelector()}>
+                    onPress={() => this.onGameModeSelector('AI')}>
                     <Text style={this.state.isDarkMode ? stylesDarkMode.Text : stylesLightMode.Text}>AI</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                     style={this.state.isDarkMode ? stylesDarkMode.versusPerson : stylesLightMode.versusPerson}
-                    onPress={() => this.onGameModeSelector()}>
+                    onPress={() => this.onGameModeSelector('Person')}>
                     <Text style={this.state.isDarkMode ? stylesDarkMode.Text : stylesLightMode.Text}>Person</Text>
                 </TouchableOpacity>
             </View>
