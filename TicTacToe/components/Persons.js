@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { Fragment, Component } from "react";
 import {
     StyleSheet,
     Text,
@@ -11,6 +11,8 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import { Input, Button } from 'react-native-elements';
 
 import GLOBALS from './Globals'
+import ArrowHeader from "./ArrowHeader";
+
 import { Actions } from "react-native-router-flux";
 
 export default class Persons extends Component {
@@ -21,7 +23,6 @@ export default class Persons extends Component {
             player1: '',
             player2: ''
         }
-        GLOBALS.storeData('isInGame', true);
     }
 
     componentDidMount() {
@@ -30,12 +31,6 @@ export default class Persons extends Component {
                 isDarkMode: value
             });
         });
-
-        GLOBALS.storeData('isInGame', true);
-    }
-
-    componentWillUnmount() {
-        GLOBALS.storeData('isInGame', false);
     }
 
 
@@ -47,48 +42,95 @@ export default class Persons extends Component {
         });
     }
 
+    onSwitchChange = () => {
+        GLOBALS.getStoreData('darkMode').then((value) => {
+            this.setState({
+                isDarkMode: value
+            });
+        });
+    }
+
     render() {
 
         return (
-            <View style={this.state.isDarkMode ? stylesDarkMode.container : stylesLightMode.container}>
-                <Input
-                    inputContainerStyle={{ borderWidth: 1, borderRadius: 50 }}
-                    placeholder="Insira o nome do Jogador 1"
-                    leftIcon={
-                        <Icon
-                            name='user'
-                            size={24}
-                            color={this.state.isDarkMode ? '#fff' : '#6200EE'}
-                        />
-                    }
-                    inputStyle={this.state.isDarkMode ? stylesDarkMode.textInputs : stylesLightMode.textInputs}
-                    value={this.state.player1}
-                    onChangeText={(player1) => this.setState({ player1: player1 })}
-                />
+            <Fragment>
+                <ArrowHeader onSwitchChange={() => this.onSwitchChange()}  />
 
-                <Input
-                    containerStyle={{ paddingTop: 10 }}
-                    inputContainerStyle={{ borderWidth: 1, borderRadius: 50 }}
-                    placeholder="Insira o nome do Jogador 2"
-                    leftIcon={
-                        <Icon
-                            name='user'
-                            size={24}
-                            color={this.state.isDarkMode ? '#fff' : '#6200EE'}
-                        />
+                <View style={this.state.isDarkMode ? stylesDarkMode.container : stylesLightMode.container}>
+
+                    {this.props.selector === 'Versus' ?
+                        (
+                            <View>
+                                <Input
+                                    inputContainerStyle={{ borderWidth: 1, borderRadius: 50 }}
+                                    placeholder="Insira o nome do Jogador 1"
+                                    leftIcon={
+                                        <Icon
+                                            name='user'
+                                            size={24}
+                                            color={this.state.isDarkMode ? '#fff' : '#6200EE'}
+                                        />
+                                    }
+                                    inputStyle={this.state.isDarkMode ? stylesDarkMode.textInputs : stylesLightMode.textInputs}
+                                    value={this.state.player1}
+                                    onChangeText={(player1) => this.setState({ player1: player1 })}
+                                />
+
+                                <Input
+                                    containerStyle={{ paddingTop: 10 }}
+                                    inputContainerStyle={{ borderWidth: 1, borderRadius: 50 }}
+                                    placeholder="Insira o nome do Jogador 2"
+                                    leftIcon={
+                                        <Icon
+                                            name='user'
+                                            size={24}
+                                            color={this.state.isDarkMode ? '#fff' : '#6200EE'}
+                                        />
+                                    }
+                                    inputStyle={this.state.isDarkMode ? stylesDarkMode.textInputs : stylesLightMode.textInputs}
+                                    value={this.state.player2}
+                                    onChangeText={(player2) => this.setState({ player2: player2 })}
+                                />
+                                <Button
+                                    type="outline"
+                                    title="PLAY"
+                                    containerStyle={{ paddingTop: 10 }}
+                                    buttonStyle={{ width: 200 }}
+                                    onPress={() => this.onPlayPress()}
+                                />
+
+                            </View>
+
+                        ) : (
+                            <View>
+                                <Input
+                                    inputContainerStyle={{ borderWidth: 1, borderRadius: 50 }}
+                                    placeholder="Insira o nome do Jogador 1"
+                                    leftIcon={
+                                        <Icon
+                                            name='user'
+                                            size={24}
+                                            color={this.state.isDarkMode ? '#fff' : '#6200EE'}
+                                        />
+                                    }
+                                    inputStyle={this.state.isDarkMode ? stylesDarkMode.textInputs : stylesLightMode.textInputs}
+                                    value={this.state.player1}
+                                    onChangeText={(player1) => this.setState({ player1: player1 })}
+                                />
+
+                                <Button
+                                    type="outline"
+                                    title="PLAY"
+                                    containerStyle={{ paddingTop: 10 }}
+                                    buttonStyle={{ width: 200 }}
+                                    onPress={() => this.onPlayPress()}
+                                />
+                            </View>
+                        )
                     }
-                    inputStyle={this.state.isDarkMode ? stylesDarkMode.textInputs : stylesLightMode.textInputs}
-                    value={this.state.player2}
-                    onChangeText={(player2) => this.setState({ player2: player2 })}
-                />
-                <Button                    
-                    type="outline"
-                    title="PLAY"
-                    containerStyle={{paddingTop: 10}}
-                    buttonStyle={{width: 200}}
-                    onPress={() => this.onPlayPress()}
-                />
-            </View>
+
+                </View>
+            </Fragment>
         );
     };
 

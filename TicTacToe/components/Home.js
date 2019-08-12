@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React, { Fragment, Component } from 'react'
 import {
     StyleSheet,
     Text,
@@ -9,6 +9,8 @@ import {
 import { Actions } from "react-native-router-flux";
 
 import GLOBALS from './Globals'
+import Header from "./Header";
+
 
 export default class Home extends Component {
     constructor() {
@@ -16,7 +18,6 @@ export default class Home extends Component {
         this.state = {
             isDarkMode: false
         }
-        GLOBALS.storeData('isInGame', false);
     }
 
     componentDidMount() {
@@ -25,37 +26,48 @@ export default class Home extends Component {
                 isDarkMode: value
             });
         });
-
-        GLOBALS.storeData('isInGame', false);
     }
 
     onGameModeSelector = (value) => {
-        if(value === 'AI'){
-            Actions.game({
-                gameMode: 'AI'
+        if (value === 'AI') {
+            Actions.persons({
+                selector: 'AI'
             });
         } else {
             Actions.persons({
-                hello: 'Versus'
+                selector: 'Versus'
             })
         }
-        
+
+    }
+
+    onSwitchChange = () => {
+        GLOBALS.getStoreData('darkMode').then((value) => {
+            this.setState({
+                isDarkMode: value
+            });
+        });
     }
 
     render() {
         return (
-            <View style={this.state.isDarkMode ? stylesDarkMode.container : stylesLightMode.container}>
-                <TouchableOpacity
-                    style={this.state.isDarkMode ? stylesDarkMode.versusAi : stylesLightMode.versusAi}
-                    onPress={() => this.onGameModeSelector('AI')}>
-                    <Text style={this.state.isDarkMode ? stylesDarkMode.Text : stylesLightMode.Text}>AI</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    style={this.state.isDarkMode ? stylesDarkMode.versusPerson : stylesLightMode.versusPerson}
-                    onPress={() => this.onGameModeSelector('Person')}>
-                    <Text style={this.state.isDarkMode ? stylesDarkMode.Text : stylesLightMode.Text}>Person</Text>
-                </TouchableOpacity>
-            </View>
+            <Fragment>
+                <Header onSwitchChange={() => this.onSwitchChange()} />
+
+                <View style={this.state.isDarkMode ? stylesDarkMode.container : stylesLightMode.container}>
+                    <TouchableOpacity
+                        style={this.state.isDarkMode ? stylesDarkMode.versusAi : stylesLightMode.versusAi}
+                        onPress={() => this.onGameModeSelector('AI')}>
+                        <Text style={this.state.isDarkMode ? stylesDarkMode.Text : stylesLightMode.Text}>AI</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={this.state.isDarkMode ? stylesDarkMode.versusPerson : stylesLightMode.versusPerson}
+                        onPress={() => this.onGameModeSelector('Person')}>
+                        <Text style={this.state.isDarkMode ? stylesDarkMode.Text : stylesLightMode.Text}>Person</Text>
+                    </TouchableOpacity>
+                </View>
+
+            </Fragment>
         )
     }
 }

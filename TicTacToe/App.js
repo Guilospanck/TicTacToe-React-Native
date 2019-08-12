@@ -20,7 +20,6 @@ import {
   Scene
 } from 'react-native-router-flux';
 
-import Header from "./components/Header";
 import Home from "./components/Home"
 import Game from "./components/Game"
 import Persons from "./components/Persons";
@@ -33,15 +32,13 @@ class App extends Component {
     return (
       <Fragment>
         <StatusBar backgroundColor="#3700B3" />
-        <View style={styles.container}>
-          <Router>
-            <Scene key="root" headerMode="screen" navBar={Header}>
-              <Scene key="home" component={Home} />
-              <Scene key="game" component={Game} />
-              <Scene key="persons" component={Persons} />
-            </Scene>
-          </Router>
-        </View>
+        <Router>
+          <Scene key="root" headerMode="none">
+            <Scene key="home" component={Home} />
+            <Scene key="game" component={Game} />
+            <Scene key="persons" component={Persons} />
+          </Scene>
+        </Router>
       </Fragment >
     );
   }

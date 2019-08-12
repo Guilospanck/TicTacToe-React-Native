@@ -16,7 +16,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import GLOBALS from './Globals'
 
 
-export default class Header extends Component {
+export default class ArrowHeader extends Component {
     constructor() {
         super();
         this.state = {
@@ -48,7 +48,17 @@ export default class Header extends Component {
     render() {
         return (
             <View style={styles.container}>
-                
+                <View>
+                    <TouchableOpacity onPress={() => this.goBack()}>
+                        <Icon
+                            name='chevron-left'
+                            size={30}
+                            color='white'
+                            style={styles.arrowBack}
+                        />
+                    </TouchableOpacity>
+
+                </View>
                 <Text style={styles.title}>
                     Tic Tac Toe
                 </Text>
@@ -59,7 +69,7 @@ export default class Header extends Component {
                             <Icon
                                 name='sun-o'
                                 size={25}
-                                color='white'                                
+                                color='white'
                             />
                         </TouchableOpacity>
                     </View>
@@ -73,11 +83,11 @@ export default class Header extends Component {
                     </View>
                     <View>
                         <TouchableOpacity onPress={() => this.toggleSwitch(true)}>
-                            {/* <Text style={styles.night}>☾</Text> */}                            
+                            {/* <Text style={styles.night}>☾</Text> */}
                             <Icon
                                 name='moon-o'
                                 size={25}
-                                color='black'                                
+                                color='black'
                             />
                         </TouchableOpacity>
                     </View>
