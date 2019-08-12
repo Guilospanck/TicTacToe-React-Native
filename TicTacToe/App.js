@@ -32,10 +32,9 @@ class App extends Component {
     return (
       <Fragment>
         <StatusBar backgroundColor="#3700B3" />
-        <Header />
         <View style={styles.container}>
           <Router>
-            <Scene key="root" headerMode="none">
+            <Scene key="root" headerMode="screen" navBar={Header}>
               <Scene key="home" component={Home} />
               <Scene key="game" component={Game} />
             </Scene>

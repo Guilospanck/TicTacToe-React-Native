@@ -7,6 +7,12 @@ import {
     Switch
 } from 'react-native'
 
+import {
+    Actions
+} from 'react-native-router-flux';
+
+import Icon from 'react-native-vector-icons/Ionicons'
+
 import GLOBALS from './Globals'
 
 
@@ -17,6 +23,9 @@ export default class Header extends Component {
             switchValue: false,
             isInGame: false
         }
+    }
+
+    componentDidMount() {
         GLOBALS.getStoreData('darkMode').then((value) => {
             this.setState({
                 switchValue: value
@@ -27,25 +36,33 @@ export default class Header extends Component {
                 isInGame: value
             });
         });
-        console.log(this.setState.isInGame);
     }
 
-    
+
     toggleSwitch = (value) => {
         this.setState({
             switchValue: value
         });
         GLOBALS.storeData('darkMode', value);
+        Actions[Actions.currentScene].call();
+    }
+
+    goBack() {
+        Actions.home();
     }
 
     render() {
         return (
             <View style={styles.container}>
                 <View>
-                    {this.state.isInGame &&
-                        <TouchableOpacity>
-                            <Text style={styles.day}>BACK</Text>
+                    {this.state.isInGame ? (
+                        <TouchableOpacity onPress={() => this.goBack()}>
+                            <Icon name="ios-arrow-round-back" style={styles.arrowBack}/>
                         </TouchableOpacity>
+                    )
+                        : (
+                            <View />
+                        )
                     }
                 </View>
                 <Text style={styles.title}>
@@ -116,5 +133,10 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         fontWeight: 'bold',
         color: GLOBALS.DARK_MODE.primaryDark
+    },
+    arrowBack: {
+        fontSize: 50,
+        color: 'white',
+        marginLeft: 10
     }
 })

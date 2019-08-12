@@ -9,16 +9,23 @@ import {
 
 import GLOBALS from './Globals'
 
-export default class Game extends Component{
+export default class Game extends Component {
 
-    constructor(){
+    constructor() {
         super();
         GLOBALS.storeData('isInGame', true);
     }
-    
 
-    render(){
-        return(
+    componentDidMount() {
+        GLOBALS.storeData('isInGame', true);
+    }
+
+    componentWillUnmount(){
+        GLOBALS.storeData('isInGame', false);
+    }
+
+    render() {
+        return (
             <View>
                 <Text>Game works! {this.props.gameMode}</Text>
             </View>

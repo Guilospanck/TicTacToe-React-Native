@@ -16,20 +16,17 @@ export default class Home extends Component {
         this.state = {
             isDarkMode: false
         }
-        GLOBALS.getStoreData('darkMode').then((value) => {
-            this.setState({
-                isDarkMode: value
-            });
-        });
         GLOBALS.storeData('isInGame', false);
     }
 
-    componentDidUpdate() {
+    componentDidMount() {
         GLOBALS.getStoreData('darkMode').then((value) => {
             this.setState({
                 isDarkMode: value
             });
         });
+
+        GLOBALS.storeData('isInGame', false);
     }
 
     onGameModeSelector = () => {
@@ -41,14 +38,14 @@ export default class Home extends Component {
     render() {
         return (
             <View style={this.state.isDarkMode ? stylesDarkMode.container : stylesLightMode.container}>
-                <TouchableOpacity 
-                style={this.state.isDarkMode ? stylesDarkMode.versusAi : stylesLightMode.versusAi}
-                onPress={()=>this.onGameModeSelector()}>
+                <TouchableOpacity
+                    style={this.state.isDarkMode ? stylesDarkMode.versusAi : stylesLightMode.versusAi}
+                    onPress={() => this.onGameModeSelector()}>
                     <Text style={this.state.isDarkMode ? stylesDarkMode.Text : stylesLightMode.Text}>AI</Text>
                 </TouchableOpacity>
-                <TouchableOpacity 
-                style={this.state.isDarkMode ? stylesDarkMode.versusPerson : stylesLightMode.versusPerson}
-                onPress={()=>this.onGameModeSelector()}>
+                <TouchableOpacity
+                    style={this.state.isDarkMode ? stylesDarkMode.versusPerson : stylesLightMode.versusPerson}
+                    onPress={() => this.onGameModeSelector()}>
                     <Text style={this.state.isDarkMode ? stylesDarkMode.Text : stylesLightMode.Text}>Person</Text>
                 </TouchableOpacity>
             </View>
