@@ -60,6 +60,23 @@ export default class Game extends Component {
         }
     }
 
+    verifyTie = () => {
+        let gameState = this.state.gameState.slice();
+        let totalDirtyCount = 0;
+        for (let i = 0; i < 3; i++) {
+            for (let j = 0; j < 3; j++) {
+                if (gameState[i][j] !== 0)
+                    totalDirtyCount++;
+            }
+        }
+
+        if (totalDirtyCount === 9) {
+            return true;
+        }
+
+        return false;
+    }
+
     verifyWinner = () => {
         let rowsSum = 0;
         let colsSum = 0;
@@ -84,6 +101,8 @@ export default class Game extends Component {
         if (diag2Sum === 3) return 1;
         if (diag2Sum === -3) return -1;
 
+        if (this.verifyTie() === true)
+            return 2;
         return 0;
     }
 
@@ -95,7 +114,7 @@ export default class Game extends Component {
             });
             Alert.alert(this.props.player1 + ' venceu!');
         }
-        if (winner === -1) {
+        else if (winner === -1) {
             this.setState({
                 gameIsEnded: true
             });
@@ -104,12 +123,19 @@ export default class Game extends Component {
                 Alert.alert(this.props.player2 + ' venceu!');
             else
                 Alert.alert("A Máquina venceu!");
-        }
+        } else if (winner === 2){
+            this.setState({
+                gameIsEnded: true
+            });
+            Alert.alert('Empate!');
+        } 
         return winner;
     }
 
 
     onPressTile = (row, col) => {
+        if (this.state.gameIsEnded === true) return;
+
         let value = this.state.initialPlayer;
 
         let gameStateClone = this.state.gameState.slice();
@@ -124,10 +150,8 @@ export default class Game extends Component {
                 gameState: gameStateClone,
                 initialPlayer: value
             }, () => {
-                let win = this.isThereAWinner(); // Verify if the user won the game...
-
-                if (win === 1 || win === -1) return;
-                
+                let win = this.isThereAWinner(); // Verify if the user won, lost or there is a tie
+                if (win === 1 || win === -1 || win === 2) return;
 
                 if (win === 0) {
                     setTimeout(() => {
@@ -160,7 +184,7 @@ export default class Game extends Component {
         return [randomRow, randomCol];
     }
 
-    letAIPlay() {
+    randomAI = () => {
         let gameStateClone = this.state.gameState.slice();
         [row, col] = this.getRandomRowAndCol();
 
@@ -175,7 +199,83 @@ export default class Game extends Component {
             }, () => {
                 return;
             });
-        } else this.letAIPlay();
+        } else this.randomAI();
+    }
+
+    verififyTicTacToeMatrix = () => {
+        let rowsSum = 0;
+        let colsSum = 0;
+        let gameState = this.state.gameState.slice();
+
+        for (let i = 0; i < 3; i++) {
+            for (let j = 0; j < 3; j++) {
+                rowsSum = gameState[i][j] + rowsSum;
+                colsSum = gameState[j][i] + colsSum;
+            }
+            if (rowsSum === 2) {
+                return [gameState, 'row', i];
+            }
+            else if (colsSum === 2) {
+                return [gameState, 'col', i];
+            }
+
+            rowsSum = 0;
+            colsSum = 0;
+        }
+
+        let diag1Sum = gameState[0][0] + gameState[1][1] + gameState[2][2];
+        let diag2Sum = gameState[0][2] + gameState[1][1] + gameState[2][0];
+
+        if (diag1Sum === 2) {
+            return [gameState, 'primaryDiag', null];
+        } else if (diag2Sum === 2) {
+            return [gameState, 'secondaryDiag', null];
+        } else {
+            return [gameState, 'none', null];
+        }
+    }
+
+
+    notRandomAI = (row, col) => {
+        let gameState = this.state.gameState.slice();
+
+        gameState[row][col] = -1;
+        let anotherValue = this.state.initialPlayer;
+        anotherValue = anotherValue * -1;
+
+        this.setState({
+            gameState: gameState,
+            initialPlayer: anotherValue
+        }, () => {
+            return;
+        });
+    }
+
+    letAIPlay() {
+        [gameState, result, rowOrCol] = this.verififyTicTacToeMatrix();
+
+        if (result === 'none') { // there is no way that the other can win now
+            this.randomAI();
+        } else {
+            if (result === 'row' || result === 'col') {
+                for (let i = 0; i < 3; i++) {
+                    if (result === 'row') { // some row has sum of 2
+                        if (gameState[rowOrCol][i] === 0) return this.notRandomAI(rowOrCol, i);
+                    } else if (result === 'col') { // some col has sum of 2
+                        if (gameState[i][rowOrCol] === 0) return this.notRandomAI(i, rowOrCol);
+                    }
+                }
+            } else if (result === 'primaryDiag') { // primary diagonal has sum of 2
+                if (gameState[0][0] === 0) return this.notRandomAI(0, 0);
+                else if (gameState[1][1] === 0) return this.notRandomAI(1, 1);
+                else if (gameState[2][2] === 0) return this.notRandomAI(2, 2);
+            } else if (result === 'secondaryDiag'){ // secondary diagonal has sum of 2
+                if (gameState[0][2] === 0) return this.notRandomAI(0, 2);
+                else if (gameState[1][1] === 0) return this.notRandomAI(1, 1);
+                else if (gameState[2][0] === 0) return this.notRandomAI(2, 0);
+            }
+        }
+
 
     }
 
