@@ -123,12 +123,12 @@ export default class Game extends Component {
                 Alert.alert(this.props.player2 + ' venceu!');
             else
                 Alert.alert("A Máquina venceu!");
-        } else if (winner === 2){
+        } else if (winner === 2) {
             this.setState({
                 gameIsEnded: true
             });
             Alert.alert('Empate!');
-        } 
+        }
         return winner;
     }
 
@@ -212,10 +212,13 @@ export default class Game extends Component {
                 rowsSum = gameState[i][j] + rowsSum;
                 colsSum = gameState[j][i] + colsSum;
             }
-            if (rowsSum === 2) {
+            if (rowsSum === -2) {
                 return [gameState, 'row', i];
-            }
-            else if (colsSum === 2) {
+            } else if (colsSum === -2) {
+                return [gameState, 'col', i];
+            } else if (rowsSum === 2) {
+                return [gameState, 'row', i];
+            } else if (colsSum === 2) {
                 return [gameState, 'col', i];
             }
 
@@ -226,7 +229,11 @@ export default class Game extends Component {
         let diag1Sum = gameState[0][0] + gameState[1][1] + gameState[2][2];
         let diag2Sum = gameState[0][2] + gameState[1][1] + gameState[2][0];
 
-        if (diag1Sum === 2) {
+        if (diag1Sum === -2) {
+            return [gameState, 'primaryDiag', null];
+        } else if (diag2Sum === -2) {
+            return [gameState, 'secondaryDiag', null];
+        } else if (diag1Sum === 2) {
             return [gameState, 'primaryDiag', null];
         } else if (diag2Sum === 2) {
             return [gameState, 'secondaryDiag', null];
@@ -269,7 +276,7 @@ export default class Game extends Component {
                 if (gameState[0][0] === 0) return this.notRandomAI(0, 0);
                 else if (gameState[1][1] === 0) return this.notRandomAI(1, 1);
                 else if (gameState[2][2] === 0) return this.notRandomAI(2, 2);
-            } else if (result === 'secondaryDiag'){ // secondary diagonal has sum of 2
+            } else if (result === 'secondaryDiag') { // secondary diagonal has sum of 2
                 if (gameState[0][2] === 0) return this.notRandomAI(0, 2);
                 else if (gameState[1][1] === 0) return this.notRandomAI(1, 1);
                 else if (gameState[2][0] === 0) return this.notRandomAI(2, 0);
