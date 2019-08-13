@@ -30,16 +30,24 @@ export default class Persons extends Component {
             this.setState({
                 isDarkMode: value
             });
-        });
+        });     
     }
 
 
-    onPlayPress = () => {
-        Actions.game({
-            player1: this.state.player1 !== '' ? this.state.player1 : "Jogador 1",
-            player2: this.state.player2 !== '' ? this.state.player2 : "Jogador 2",
-            gameMode: 'versus'
-        });
+    onPlayPress = (value) => {
+        if(value === 'PVP'){
+            Actions.game({
+                player1: this.state.player1 !== '' ? this.state.player1 : "Jogador 1",
+                player2: this.state.player2 !== '' ? this.state.player2 : "Jogador 2",
+                gameMode: 'versus'
+            });
+        } else {
+            Actions.game({
+                player1: this.state.player1 !== '' ? this.state.player1 : "Você",
+                gameMode: 'AI'
+            });
+        }
+        
     }
 
     onSwitchChange = () => {
@@ -60,10 +68,11 @@ export default class Persons extends Component {
 
                     {this.props.selector === 'Versus' ?
                         (
-                            <View>
+                            <Fragment>
                                 <Input
                                     inputContainerStyle={{ borderWidth: 1, borderRadius: 50 }}
-                                    placeholder="Insira o nome do Jogador 1"
+                                    placeholder=" Insira o nome do Jogador 1"
+                                    maxLength={11}
                                     leftIcon={
                                         <Icon
                                             name='user'
@@ -79,7 +88,8 @@ export default class Persons extends Component {
                                 <Input
                                     containerStyle={{ paddingTop: 10 }}
                                     inputContainerStyle={{ borderWidth: 1, borderRadius: 50 }}
-                                    placeholder="Insira o nome do Jogador 2"
+                                    placeholder=" Insira o nome do Jogador 2"
+                                    maxLength={11}
                                     leftIcon={
                                         <Icon
                                             name='user'
@@ -96,16 +106,17 @@ export default class Persons extends Component {
                                     title="PLAY"
                                     containerStyle={{ paddingTop: 10 }}
                                     buttonStyle={{ width: 200 }}
-                                    onPress={() => this.onPlayPress()}
+                                    onPress={() => this.onPlayPress('PVP')}
                                 />
 
-                            </View>
+                            </Fragment>
 
                         ) : (
-                            <View>
+                            <Fragment>
                                 <Input
                                     inputContainerStyle={{ borderWidth: 1, borderRadius: 50 }}
-                                    placeholder="Insira o nome do Jogador 1"
+                                    placeholder=" Insira o nome do Jogador 1"
+                                    maxLength={11}
                                     leftIcon={
                                         <Icon
                                             name='user'
@@ -123,9 +134,9 @@ export default class Persons extends Component {
                                     title="PLAY"
                                     containerStyle={{ paddingTop: 10 }}
                                     buttonStyle={{ width: 200 }}
-                                    onPress={() => this.onPlayPress()}
+                                    onPress={() => this.onPlayPress('OnlyAI')}
                                 />
-                            </View>
+                            </Fragment>
                         )
                     }
 

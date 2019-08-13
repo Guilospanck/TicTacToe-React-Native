@@ -28,16 +28,10 @@ export default class Home extends Component {
         });
     }
 
-    onGameModeSelector = (value) => {
-        if (value === 'AI') {
-            Actions.persons({
-                selector: 'AI'
-            });
-        } else {
-            Actions.persons({
-                selector: 'Versus'
-            })
-        }
+    onGameModeSelector = (value) => {        
+        Actions.persons({
+            selector: value
+        });
 
     }
 
@@ -62,7 +56,7 @@ export default class Home extends Component {
                     </TouchableOpacity>
                     <TouchableOpacity
                         style={this.state.isDarkMode ? stylesDarkMode.versusPerson : stylesLightMode.versusPerson}
-                        onPress={() => this.onGameModeSelector('Person')}>
+                        onPress={() => this.onGameModeSelector('Versus')}>
                         <Text style={this.state.isDarkMode ? stylesDarkMode.Text : stylesLightMode.Text}>Person</Text>
                     </TouchableOpacity>
                 </View>
