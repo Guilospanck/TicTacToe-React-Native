@@ -137,6 +137,7 @@ export default class Game extends Component {
         if (this.state.gameIsEnded === true) return;
 
         let value = this.state.initialPlayer;
+        if(this.props.gameMode === 'AI' && value === -1) return;
 
         let gameStateClone = this.state.gameState.slice();
         if (gameStateClone[row][col] !== 0) return;
@@ -294,6 +295,10 @@ export default class Game extends Component {
         });
     }
 
+    onRestartPress = () => {
+        this.initializeGame();
+    }
+
     render() {
         return (
             <Fragment>
@@ -395,6 +400,16 @@ export default class Game extends Component {
                             <TouchableOpacity onPress={() => this.onPressTile(2, 2)} style={[(this.state.isDarkMode ? stylesDarkMode.tile : stylesLightMode.tile), { borderBottomWidth: 0, borderRightWidth: 0 }]}>
                                 {this.renderIcon(2, 2)}
                             </TouchableOpacity>
+                        </View>
+
+                        <View style={{marginTop: 20, justifyContent: "center", alignItems: "center"}}>
+                            <Button
+                                type="outline"
+                                title="RESTART GAME"
+                                containerStyle={{ paddingTop: 0 }}
+                                buttonStyle={{ width: 200 }}
+                                onPress={() => this.onRestartPress()}
+                            />
                         </View>
                     </View>
                 </View>
