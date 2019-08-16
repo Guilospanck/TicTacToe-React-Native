@@ -23,6 +23,8 @@ import {
 import Home from "./components/Home"
 import Game from "./components/Game"
 import Persons from "./components/Persons";
+import Versus from "./components/Versus";
+import DevicesList from "./components/DevicesList";
 
 class App extends Component {
   constructor(props) {
@@ -37,6 +39,8 @@ class App extends Component {
             <Scene key="home" component={Home} />
             <Scene key="game" component={Game} />
             <Scene key="persons" component={Persons} />
+            <Scene key="versus" component={Versus} />
+            <Scene key="devices" component={DevicesList} />
           </Scene>
         </Router>
       </Fragment >

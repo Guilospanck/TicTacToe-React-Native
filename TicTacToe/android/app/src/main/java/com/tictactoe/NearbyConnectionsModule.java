@@ -65,12 +65,16 @@ public class NearbyConnectionsModule extends ReactContextBaseJavaModule {
     private int coordinatesCol;
     private String choice;
 
+    private ArrayList<String> endpointsList;
+
     public NearbyConnectionsModule(ReactApplicationContext reactContext) {
         super(reactContext);
 
         context = reactContext;
 
         connectionsClients = Nearby.getConnectionsClient(context);
+
+        endpointsList = new ArrayList<String>();
     }
 
     @Override
@@ -91,6 +95,9 @@ public class NearbyConnectionsModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void disconnect(){
         opponentEndpointId = null;
+        connectionsClients.stopDiscovery();
+        connectionsClients.stopAdvertising();
+        connectionsClients.stopAllEndpoints();
     }
 
     @ReactMethod
@@ -98,8 +105,34 @@ public class NearbyConnectionsModule extends ReactContextBaseJavaModule {
         try {
             successCallback.invoke(coordinatesRow, coordinatesCol, choice);
         } catch (Exception e) {
-            // do something...
+            Toast.makeText(context, "getPositionsAndChoices: something went wrong! " + e, Toast.LENGTH_LONG).show();
         }
+    }
+
+    @ReactMethod
+    public void getEndpointsList(Callback list){
+        try {
+            list.invoke(endpointsList);
+        } catch (Exception e ) {
+            Toast.makeText(context, "GetEndpointList: something went wrong! " + e, Toast.LENGTH_LONG).show();
+        }
+    }
+
+    @ReactMethod
+    public void requestConnection(String endpointId){
+        connectionsClients
+                .requestConnection(codeName, endpointId, connectionLifecycleCallback)
+                .addOnSuccessListener(
+                        (Void unused) -> {
+                            // We successfully requested a connection. Now both sides must
+                            // accept before the connection is established.
+                            Toast.makeText(context, "Both sides need to accept the connection...", Toast.LENGTH_LONG).show();
+                        })
+                .addOnFailureListener(
+                        (Exception e) -> {
+                            // Nearby connections failed to request the connection.
+                            Toast.makeText(context, "Nearby connections failed to request the connection.", Toast.LENGTH_LONG).show();
+                        });
     }
 
     // payload callback
@@ -124,17 +157,8 @@ public class NearbyConnectionsModule extends ReactContextBaseJavaModule {
         @Override
         public void onEndpointFound(@NonNull String endpointId, @NonNull DiscoveredEndpointInfo info) {
             // And endpoint was found. We request a connection to it.
-            connectionsClients
-                    .requestConnection(codeName, endpointId, connectionLifecycleCallback)
-                    .addOnSuccessListener(
-                            (Void unused) -> {
-                             // We successfully requested a connection. Now both sides must
-                             // accept before the connection is established.
-                            })
-                    .addOnFailureListener(
-                            (Exception e) -> {
-                             // Nearby connections failed to request the connection.
-                            });
+            endpointsList.add(endpointId);
+            // request connection ...
         }
 
         @Override
@@ -200,7 +224,7 @@ public class NearbyConnectionsModule extends ReactContextBaseJavaModule {
     *   - advertisinOptions: informs the strategy of the communication
     * */
     @ReactMethod
-    public void startAdvertising(String user){
+    public void startAdvertising(String user, Callback successCallback){
         codeName = user;
         AdvertisingOptions advertisingOptions = new AdvertisingOptions.Builder().setStrategy(STRATEGY).build();
         connectionsClients
@@ -208,32 +232,38 @@ public class NearbyConnectionsModule extends ReactContextBaseJavaModule {
                 .addOnSuccessListener(
                         (Void unused) -> {
                             // We are advertising!
+                            Toast.makeText(context, "We are Advertising!", Toast.LENGTH_LONG).show();
+                            successCallback.invoke("Success");
                         })
                 .addOnFailureListener(
                         (Exception e) -> {
                             // We are unable to advertising.
+                            Toast.makeText(context, "We are unable to Advertising!", Toast.LENGTH_LONG).show();
                         });
     }
 
     // Starts looking for other players using Nearby Connections
     /*
-    * .startDiscovery(serviceId, endpointCallback, discoveryoptions);
+    * .startDiscovery(serviceId, endpointCallback, discoveryOptions);
     *   - serviceId: usually the same as the startAdvertising (app package name)
     *   - endpointCallback: function that will be called when you find some advertiser.
-    *   - discoveryOptions: options of the discoverty Strategy used.
+    *   - discoveryOptions: options of the discovery Strategy used.
     * */
     @ReactMethod
-    public void startDiscovery() {
+    public void startDiscovery(Callback successCallback) {
         DiscoveryOptions discoveryOptions = new DiscoveryOptions.Builder().setStrategy(STRATEGY).build();
         connectionsClients
                 .startDiscovery(getPackage(), endpointDiscoveryCallback, discoveryOptions)
                 .addOnSuccessListener(
                         (Void unused) -> {
                           // We are discovering!
+                            Toast.makeText(context, "We are Discovering!", Toast.LENGTH_LONG).show();
+                            successCallback.invoke("success");
                         })
                 .addOnFailureListener(
                         (Exception e) -> {
                             // We're unable to discovering.
+                            Toast.makeText(context, "We are unable to Discovering!", Toast.LENGTH_LONG).show();
                         });
     }
 }
