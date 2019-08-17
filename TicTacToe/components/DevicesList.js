@@ -3,14 +3,17 @@ import {
     StyleSheet,
     Text,
     View,
-    TouchableOpacity,
-    Alert
+    Alert,
+    FlatList,
+    TouchableWithoutFeedback
 } from 'react-native'
+
+import { List, ListItem } from 'react-native-elements'
 
 import { Actions } from "react-native-router-flux";
 
 import GLOBALS from './Globals'
-import Header from "./Header";
+import ArrowHeader from "./ArrowHeader";
 import NearbyConnections from './NearbyConnections';
 
 export default class DevicesList extends Component {
@@ -18,7 +21,8 @@ export default class DevicesList extends Component {
         super();
         this.state = {
             isDarkMode: false,
-            endpointList: []
+            endpointList: [],
+            refreshing: false
         }
 
         NearbyConnections.getEndpointsList((endpointList) => {
@@ -35,6 +39,13 @@ export default class DevicesList extends Component {
                 isDarkMode: value
             });
         });
+
+        NearbyConnections.getEndpointsList((endpointList) => {
+            let list = endpointList;
+            this.setState({
+                endpointList: list
+            });
+        });
     }
 
     onSwitchChange = () => {
@@ -46,24 +57,46 @@ export default class DevicesList extends Component {
     }
 
     requestConnection = (key) => {
-        Alert.alert(key);
+        Alert.alert(JSON.stringify(key));
+    }
+
+    handleRefresh = () => {
+        this.setState({ refreshing: true }, () => {
+
+            NearbyConnections.getEndpointsList((endpointList) => {
+                this.setState({
+                    endpointList: endpointList,
+                    refreshing: false
+                });
+            });
+        });
+    }
+
+    onDeviceClick = (item) => {
+        this.requestConnection(item);
     }
 
 
     render() {
         return (
             <Fragment>
-                <Header onSwitchChange={() => this.onSwitchChange()} />
+                <ArrowHeader onSwitchChange={() => this.onSwitchChange()} />
+
 
                 <View style={this.state.isDarkMode ? stylesDarkMode.container : stylesLightMode.container}>
                     <Text>A list of devices that are advertising...</Text>
-                    <ul>
-                        {this.state.endpointList.map(item => (
-                            <li onClick={(key) => this.requestConnection(key)} key={item}>{item}</li>
-                        ))}
-                    </ul>
+                    <FlatList
+                        data={this.state.endpointList}
+                        renderItem={({ item }) => (
+                            <TouchableWithoutFeedback onPress={() => this.onDeviceClick(item)}>
+                                <Text>{item}</Text>
+                            </TouchableWithoutFeedback>
+                        )}
+                        keyExtractor={(item, index) => index.toString()}
+                        refreshing={this.state.refreshing}
+                        onRefresh={() => this.handleRefresh()}
+                    />
                 </View>
-
             </Fragment>
         )
     }

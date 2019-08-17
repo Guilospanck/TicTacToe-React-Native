@@ -8,6 +8,7 @@ import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.telecom.Call;
 import android.widget.Toast;
 
 import androidx.annotation.CallSuper;
@@ -19,7 +20,11 @@ import androidx.core.content.ContextCompat;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.facebook.react.bridge.Arguments;
+import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.bridge.WritableNativeArray;
+import com.facebook.react.bridge.WritableNativeMap;
+import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.facebook.react.uimanager.IllegalViewOperationException;
 import com.facebook.react.uimanager.PixelUtil;
 import com.google.android.gms.nearby.Nearby;
@@ -27,6 +32,7 @@ import com.google.android.gms.nearby.connection.AdvertisingOptions;
 import com.google.android.gms.nearby.connection.ConnectionInfo;
 import com.google.android.gms.nearby.connection.ConnectionLifecycleCallback;
 import com.google.android.gms.nearby.connection.ConnectionResolution;
+import com.google.android.gms.nearby.connection.Connections;
 import com.google.android.gms.nearby.connection.ConnectionsClient;
 import com.google.android.gms.nearby.connection.ConnectionsStatusCodes;
 import com.google.android.gms.nearby.connection.DiscoveredEndpointInfo;
@@ -45,9 +51,17 @@ import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.Callback;
+import com.google.gson.Gson;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 public class NearbyConnectionsModule extends ReactContextBaseJavaModule {
 
@@ -65,7 +79,7 @@ public class NearbyConnectionsModule extends ReactContextBaseJavaModule {
     private int coordinatesCol;
     private String choice;
 
-    private ArrayList<String> endpointsList;
+    ArrayList<String> endpointsList;
 
     public NearbyConnectionsModule(ReactApplicationContext reactContext) {
         super(reactContext);
@@ -74,7 +88,7 @@ public class NearbyConnectionsModule extends ReactContextBaseJavaModule {
 
         connectionsClients = Nearby.getConnectionsClient(context);
 
-        endpointsList = new ArrayList<String>();
+        endpointsList = new ArrayList<>();
     }
 
     @Override
@@ -110,11 +124,19 @@ public class NearbyConnectionsModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void getEndpointsList(Callback list){
+    public void getEndpointsList(Callback successCallback){
         try {
-            list.invoke(endpointsList);
-        } catch (Exception e ) {
-            Toast.makeText(context, "GetEndpointList: something went wrong! " + e, Toast.LENGTH_LONG).show();
+            WritableArray array = new WritableNativeArray();
+            Set<String> noDuplicate = new HashSet<>();
+            noDuplicate.addAll(endpointsList);
+
+            for (String item: noDuplicate) {
+                array.pushString(item);
+            }
+            successCallback.invoke(array);
+
+        } catch (Exception e) {
+            Toast.makeText(context, "GetEndpointList: " + e, Toast.LENGTH_LONG).show();
         }
     }
 
@@ -157,6 +179,14 @@ public class NearbyConnectionsModule extends ReactContextBaseJavaModule {
         @Override
         public void onEndpointFound(@NonNull String endpointId, @NonNull DiscoveredEndpointInfo info) {
             // And endpoint was found. We request a connection to it.
+            Toast.makeText(context, "Endpoint found! " + endpointId, Toast.LENGTH_LONG).show();
+
+            // send an event to the react native app
+            WritableMap params = Arguments.createMap();
+            params.putString("event", "EndpointFound");
+            getReactApplicationContext().getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+            .emit("onEndpointFound", params);
+
             endpointsList.add(endpointId);
             // request connection ...
         }
@@ -166,6 +196,8 @@ public class NearbyConnectionsModule extends ReactContextBaseJavaModule {
 
         }
     };
+
+
 
     // Callback to connection with other devices (from this point forward the API is symmetric
     private final ConnectionLifecycleCallback connectionLifecycleCallback = new ConnectionLifecycleCallback() {

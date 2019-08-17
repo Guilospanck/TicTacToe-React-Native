@@ -4,13 +4,15 @@ import {
     Text,
     View,
     TouchableOpacity,
-    Alert
+    TouchableWithoutFeedback,
+    Alert,
+    DeviceEventEmitter
 } from 'react-native'
 
 import { Actions } from "react-native-router-flux";
 
 import GLOBALS from './Globals'
-import Header from "./Header";
+import ArrowHeader from "./ArrowHeader";
 import NearbyConnections from './NearbyConnections';
 
 
@@ -19,7 +21,9 @@ export default class Versus extends Component {
         super();
         this.state = {
             isDarkMode: false,
-            showWaitingButton: false
+            advertising: false,
+            discovering: false
+
         }
         NearbyConnections.disconnect();
     }
@@ -28,11 +32,21 @@ export default class Versus extends Component {
         GLOBALS.getStoreData('darkMode').then((value) => {
             this.setState({
                 isDarkMode: value,
-                showWaitingButton: false
+                advertising: false,
+                discovering: false
             });
         });
 
         NearbyConnections.disconnect();
+
+        this.subscription = DeviceEventEmitter.addListener('onEndpointFound', function (e) {
+            if (e.event === "EndpointFound")
+                Actions.devices();
+        });
+    }
+
+    componentWillUnmount() {
+        this.subscription.remove();
     }
 
     onSwitchChange = () => {
@@ -46,44 +60,56 @@ export default class Versus extends Component {
     startDiscovery = () => {
         NearbyConnections.disconnect();
         NearbyConnections.startDiscovery((success) => {
-            if(success === "Success"){
-                Actions.devices();
-            }
-        });     
+
+            if (success === 'success')
+                this.setState({ discovering: true, advertising: false });
+        });
     }
 
     startAdvertising = () => {
         NearbyConnections.disconnect();
         NearbyConnections.startAdvertising("Player 1", (success) => {
-            
-            if(success === "Success")
-                this.setState({showWaitingButton: true});
+
+            if (success === "Success")
+                this.setState({ advertising: true, discovering: false });
         });
     }
 
     render() {
         return (
             <Fragment>
-                <Header onSwitchChange={() => this.onSwitchChange()} />
+                <ArrowHeader onSwitchChange={() => this.onSwitchChange()} />
 
                 <View style={this.state.isDarkMode ? stylesDarkMode.container : stylesLightMode.container}>
-                    <TouchableOpacity
-                        style={this.state.isDarkMode ? stylesDarkMode.versusPerson : stylesLightMode.versusPerson}
-                        onPress={() => this.startDiscovery()}>
-                        <Text style={this.state.isDarkMode ? stylesDarkMode.Text : stylesLightMode.Text}>Encontrar jogos ativos</Text>
-                    </TouchableOpacity>
 
-                    <TouchableOpacity
-                        style={[this.state.isDarkMode ? stylesDarkMode.versusPerson : stylesLightMode.versusPerson, {marginTop: 10}]}
-                        onPress={() => this.startAdvertising()}>
-                        <Text style={this.state.isDarkMode ? stylesDarkMode.Text : stylesLightMode.Text}>Esperar jogadores</Text>
-                    </TouchableOpacity>
-                    {this.state.showWaitingButton ? (
-                        <Text style={{marginTop: 25}}>Waiting for players...</Text>
+                    {this.state.discovering ? (
+                        <TouchableOpacity
+                            style={this.state.isDarkMode ? stylesDarkMode.versusPerson : stylesLightMode.versusPerson}
+                            >
+                            <Text style={this.state.isDarkMode ? stylesDarkMode.Text : stylesLightMode.Text}>Descobrindo...</Text>
+                        </TouchableOpacity>
                     ) : (
-                        <Fragment></Fragment>
-                    )}
-                    
+                            <TouchableOpacity
+                                style={this.state.isDarkMode ? stylesDarkMode.versusPerson : stylesLightMode.versusPerson}
+                                onPress={() => this.startDiscovery()}>
+                                <Text style={this.state.isDarkMode ? stylesDarkMode.Text : stylesLightMode.Text}>Encontrar jogos ativos</Text>
+                            </TouchableOpacity>
+                        )}
+
+                    {this.state.advertising ? (
+                        <TouchableOpacity
+                            style={[this.state.isDarkMode ? stylesDarkMode.versusPerson : stylesLightMode.versusPerson, { marginTop: 10 }]}
+                        >
+                            <Text style={this.state.isDarkMode ? stylesDarkMode.Text : stylesLightMode.Text}>Esperando...</Text>
+                        </TouchableOpacity>
+                    ) : (
+                            <TouchableOpacity
+                                style={[this.state.isDarkMode ? stylesDarkMode.versusPerson : stylesLightMode.versusPerson, { marginTop: 10 }]}
+                                onPress={() => this.startAdvertising()}>
+                                <Text style={this.state.isDarkMode ? stylesDarkMode.Text : stylesLightMode.Text}>Esperar jogadores</Text>
+                            </TouchableOpacity>
+                        )}
+
                 </View>
 
             </Fragment>
