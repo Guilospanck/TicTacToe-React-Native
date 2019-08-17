@@ -5,10 +5,10 @@ import {
     View,
     Alert,
     FlatList,
-    TouchableWithoutFeedback
 } from 'react-native'
 
-import { List, ListItem } from 'react-native-elements'
+import { ListItem } from "react-native-elements";
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 import { Actions } from "react-native-router-flux";
 
@@ -82,21 +82,36 @@ export default class DevicesList extends Component {
             <Fragment>
                 <ArrowHeader onSwitchChange={() => this.onSwitchChange()} />
 
-
                 <View style={this.state.isDarkMode ? stylesDarkMode.container : stylesLightMode.container}>
-                    <Text>A list of devices that are advertising...</Text>
+                    <Text style={[this.state.isDarkMode? stylesDarkMode.Text : stylesLightMode.Text, { marginBottom: 10 }]}>A list of devices that are advertising...</Text>
                     <FlatList
                         data={this.state.endpointList}
                         renderItem={({ item }) => (
-                            <TouchableWithoutFeedback onPress={() => this.onDeviceClick(item)}>
-                                <Text>{item}</Text>
-                            </TouchableWithoutFeedback>
+                            <ListItem
+                                roundAvatar
+                                title={item}
+                                subtitle={item}
+                                chevron={true}
+                                leftIcon={
+                                    <Icon
+                                        name='mobile'
+                                        size={36}
+                                        color={this.state.isDarkMode ? 'white' : 'black'}
+                                    />
+                                }
+                                onPress={() => this.onDeviceClick(item)}
+                                containerStyle={this.state.isDarkMode ? stylesDarkMode.container : stylesLightMode.container}
+                                titleStyle={this.state.isDarkMode? stylesDarkMode.Text : stylesLightMode.Text}
+                                subtitleStyle={this.state.isDarkMode? stylesDarkMode.Text : stylesLightMode.Text}
+                                bottomDivider={true}
+                                topDivider={true}
+                            />
                         )}
                         keyExtractor={(item, index) => index.toString()}
                         refreshing={this.state.refreshing}
                         onRefresh={() => this.handleRefresh()}
                     />
-                </View>
+                </View>                
             </Fragment>
         )
     }
@@ -104,12 +119,10 @@ export default class DevicesList extends Component {
 
 const stylesLightMode = StyleSheet.create({
     container: {
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center"
+        flex: 1
     },
     Text: {
-        fontSize: 20,
+        fontSize: 14,        
         color: GLOBALS.LIGHT_MODE.textColor
     }
 });
@@ -117,12 +130,10 @@ const stylesLightMode = StyleSheet.create({
 const stylesDarkMode = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
         backgroundColor: GLOBALS.DARK_MODE.primaryLight
     },
     Text: {
-        fontSize: 20,
+        fontSize: 14,        
         color: GLOBALS.DARK_MODE.textColor
     }
 })

@@ -26,7 +26,7 @@ import Persons from "./components/Persons";
 import Versus from "./components/Versus";
 import DevicesList from "./components/DevicesList";
 
-class App extends Component {
+export default class App extends Component {
   constructor(props) {
     super(props);
   }
@@ -55,4 +55,3 @@ const styles = StyleSheet.create({
   }
 });
 
-export default App;
