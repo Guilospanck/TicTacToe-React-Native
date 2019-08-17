@@ -58,9 +58,11 @@ import org.json.JSONObject;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class NearbyConnectionsModule extends ReactContextBaseJavaModule {
@@ -80,6 +82,8 @@ public class NearbyConnectionsModule extends ReactContextBaseJavaModule {
     private String choice;
 
     ArrayList<String> endpointsList;
+    Map<String, String> endpointsAndDeviceNames;
+
 
     public NearbyConnectionsModule(ReactApplicationContext reactContext) {
         super(reactContext);
@@ -89,6 +93,7 @@ public class NearbyConnectionsModule extends ReactContextBaseJavaModule {
         connectionsClients = Nearby.getConnectionsClient(context);
 
         endpointsList = new ArrayList<>();
+        endpointsAndDeviceNames = new HashMap<>();
     }
 
     @Override
@@ -125,15 +130,28 @@ public class NearbyConnectionsModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void getEndpointsList(Callback successCallback){
-        try {
-            WritableArray array = new WritableNativeArray();
-            Set<String> noDuplicate = new HashSet<>();
-            noDuplicate.addAll(endpointsList);
+//        try {
+//            WritableArray array = new WritableNativeArray();
+//            Set<String> noDuplicate = new HashSet<>();
+//            noDuplicate.addAll(endpointsList);
+//
+//            for (String item: noDuplicate) {
+//                array.pushString(item);
+//            }
+//            successCallback.invoke(array);
+//
+//        } catch (Exception e) {
+//            Toast.makeText(context, "GetEndpointList: " + e, Toast.LENGTH_LONG).show();
+//        }
 
-            for (String item: noDuplicate) {
-                array.pushString(item);
+        try {
+            WritableMap map = new WritableNativeMap();
+
+            for(Map.Entry<String, String> entry : endpointsAndDeviceNames.entrySet()){
+                map.putString(entry.getKey(), entry.getValue());
             }
-            successCallback.invoke(array);
+
+            successCallback.invoke(map);
 
         } catch (Exception e) {
             Toast.makeText(context, "GetEndpointList: " + e, Toast.LENGTH_LONG).show();
@@ -188,7 +206,7 @@ public class NearbyConnectionsModule extends ReactContextBaseJavaModule {
             .emit("onEndpointFound", params);
 
             endpointsList.add(endpointId);
-            // request connection ...
+            endpointsAndDeviceNames.put(endpointId, info.getEndpointName());
         }
 
         @Override

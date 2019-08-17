@@ -22,13 +22,16 @@ export default class DevicesList extends Component {
         this.state = {
             isDarkMode: false,
             endpointList: [],
+            infoEndpointName: [],
             refreshing: false
         }
 
         NearbyConnections.getEndpointsList((endpointList) => {
-            let list = endpointList;
+            let list = Object.keys(endpointList); // get the endpointsId
+            let info = Object.values(endpointList); // getTheDiscoveryEndpointInfo(name)
             this.setState({
-                endpointList: list
+                endpointList: list,
+                infoEndpointName: info
             });
         });
     }
@@ -41,9 +44,11 @@ export default class DevicesList extends Component {
         });
 
         NearbyConnections.getEndpointsList((endpointList) => {
-            let list = endpointList;
+            let list = Object.keys(endpointList); // get the endpointsId
+            let info = Object.values(endpointList); // getTheDiscoveryEndpointInfo(name)
             this.setState({
-                endpointList: list
+                endpointList: list,
+                infoEndpointName: info
             });
         });
     }
@@ -64,9 +69,12 @@ export default class DevicesList extends Component {
         this.setState({ refreshing: true }, () => {
 
             NearbyConnections.getEndpointsList((endpointList) => {
+                let list = Object.keys(endpointList); // get the endpointsId
+                let info = Object.values(endpointList); // getTheDiscoveryEndpointInfo(name)
                 this.setState({
-                    endpointList: endpointList,
-                    refreshing: false
+                    endpointList: list,
+                    infoEndpointName: info,
+                    refreshing: true
                 });
             });
         });
@@ -83,13 +91,13 @@ export default class DevicesList extends Component {
                 <ArrowHeader onSwitchChange={() => this.onSwitchChange()} />
 
                 <View style={this.state.isDarkMode ? stylesDarkMode.container : stylesLightMode.container}>
-                    <Text style={[this.state.isDarkMode? stylesDarkMode.Text : stylesLightMode.Text, { marginBottom: 10 }]}>A list of devices that are advertising...</Text>
+                    <Text style={[this.state.isDarkMode ? stylesDarkMode.Text : stylesLightMode.Text, { marginBottom: 10 }]}>A list of devices that are advertising...</Text>
                     <FlatList
                         data={this.state.endpointList}
-                        renderItem={({ item }) => (
+                        renderItem={({ item, index }) => (
                             <ListItem
                                 roundAvatar
-                                title={item}
+                                title={this.state.infoEndpointName[index]}
                                 subtitle={item}
                                 chevron={true}
                                 leftIcon={
@@ -101,8 +109,8 @@ export default class DevicesList extends Component {
                                 }
                                 onPress={() => this.onDeviceClick(item)}
                                 containerStyle={this.state.isDarkMode ? stylesDarkMode.container : stylesLightMode.container}
-                                titleStyle={this.state.isDarkMode? stylesDarkMode.Text : stylesLightMode.Text}
-                                subtitleStyle={this.state.isDarkMode? stylesDarkMode.Text : stylesLightMode.Text}
+                                titleStyle={this.state.isDarkMode ? stylesDarkMode.Text : stylesLightMode.Text}
+                                subtitleStyle={this.state.isDarkMode ? stylesDarkMode.Text : stylesLightMode.Text}
                                 bottomDivider={true}
                                 topDivider={true}
                             />
@@ -111,7 +119,7 @@ export default class DevicesList extends Component {
                         refreshing={this.state.refreshing}
                         onRefresh={() => this.handleRefresh()}
                     />
-                </View>                
+                </View>
             </Fragment>
         )
     }
@@ -122,7 +130,7 @@ const stylesLightMode = StyleSheet.create({
         flex: 1
     },
     Text: {
-        fontSize: 14,        
+        fontSize: 14,
         color: GLOBALS.LIGHT_MODE.textColor
     }
 });
@@ -133,7 +141,7 @@ const stylesDarkMode = StyleSheet.create({
         backgroundColor: GLOBALS.DARK_MODE.primaryLight
     },
     Text: {
-        fontSize: 14,        
+        fontSize: 14,
         color: GLOBALS.DARK_MODE.textColor
     }
 })
