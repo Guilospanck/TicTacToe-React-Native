@@ -5,6 +5,7 @@ import {
     View,
     Alert,
     FlatList,
+    DeviceEventEmitter
 } from 'react-native'
 
 import { ListItem } from "react-native-elements";
@@ -51,6 +52,21 @@ export default class DevicesList extends Component {
                 infoEndpointName: info
             });
         });
+
+        this.subscription = DeviceEventEmitter.addListener('onConnectionResult', function (e) {
+            if (e.event === "Connected")
+                Actions.game({
+                    gameMode: 'versus',
+                    player1: 'Player 1',
+                    player2: 'Player 2',
+                    discovering: true,
+                    advertising: false
+                });
+        });
+    }
+
+    componentWillUnmount() {
+        this.subscription.remove();
     }
 
     onSwitchChange = () => {
@@ -62,7 +78,7 @@ export default class DevicesList extends Component {
     }
 
     requestConnection = (key) => {
-        Alert.alert(JSON.stringify(key));
+        NearbyConnections.requestConnection(key);
     }
 
     handleRefresh = () => {
@@ -74,7 +90,7 @@ export default class DevicesList extends Component {
                 this.setState({
                     endpointList: list,
                     infoEndpointName: info,
-                    refreshing: true
+                    refreshing: false
                 });
             });
         });

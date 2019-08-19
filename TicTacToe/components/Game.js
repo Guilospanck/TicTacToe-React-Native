@@ -3,7 +3,8 @@ import {
     StyleSheet,
     View,
     TouchableOpacity,
-    Alert
+    Alert,
+    DeviceEventEmitter
 } from 'react-native'
 
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -11,6 +12,7 @@ import { Input, Button } from 'react-native-elements';
 
 import GLOBALS from './Globals'
 import ArrowHeader from "./ArrowHeader";
+import NearbyConnections from './NearbyConnections';
 
 export default class Game extends Component {
 
@@ -36,6 +38,36 @@ export default class Game extends Component {
         });
 
         this.initializeGame();
+
+        /** Receive choices from the other device */
+        this.subscription = DeviceEventEmitter.addListener('onPayloadReceived', (e) => {
+            if (e.event === "PayloadReceived") {
+
+                if(e.restart === "true"){
+                    this.onRestartPress();
+                    return;
+                }
+
+                let gameStateClone = this.state.gameState.slice();
+                let value = parseInt(e.choice);
+
+                gameStateClone[e.row][e.col] = value;
+
+                value = value * -1;
+
+                this.setState({
+                    gameState: gameStateClone,
+                    initialPlayer: value
+                });
+
+                this.isThereAWinner();
+                if (this.state.gameIsEnded === true) return;
+            }
+        });
+    }
+
+    componentWillUnmount() {
+        this.subscription.remove();
     }
 
     initializeGame() {
@@ -132,47 +164,67 @@ export default class Game extends Component {
         return winner;
     }
 
-
-    onPressTile = (row, col) => {
-        if (this.state.gameIsEnded === true) return;
-
-        let value = this.state.initialPlayer;
-        if(this.props.gameMode === 'AI' && value === -1) return;
+    onPressTileVersus = (row, col) => {
+        if (this.state.gameIsEnded === true) return; // if the game is ended, there is no reason to continue to render inputs
 
         let gameStateClone = this.state.gameState.slice();
-        if (gameStateClone[row][col] !== 0) return;
+        if (gameStateClone[row][col] !== 0) return; // if the tile is already dirty, there is no reason to allow input in that tile
+
+        let value = this.state.initialPlayer;
+
+        if(this.props.advertising && !this.props.discovering && value !== 1) return; // if is the advertising (player 1 - X), and it is not his turn, return
+        if(!this.props.advertising && this.props.discovering && value !== -1) return;
+
+        let valueToPayload = value.toString();
 
         gameStateClone[row][col] = value;
 
         value = value * -1;
 
-        if (this.props.gameMode === 'AI') {
-            this.setState({
-                gameState: gameStateClone,
-                initialPlayer: value
-            }, () => {
-                let win = this.isThereAWinner(); // Verify if the user won, lost or there is a tie
-                if (win === 1 || win === -1 || win === 2) return;
-
-                if (win === 0) {
-                    setTimeout(() => {
-                        this.letAIPlay();
-                        this.isThereAWinner(); // Verify if the machine has won the game...
-                    }, 1500);
-                }
+        this.setState({
+            gameState: gameStateClone,
+            initialPlayer: value
+        });
 
 
-            });
-        } else {
-            this.setState({
-                gameState: gameStateClone,
-                initialPlayer: value
-            });
+        this.isThereAWinner();
 
-            this.isThereAWinner();
-            if (this.state.gameIsEnded === true) return;
-        }
+        /** Send choices to the other device */
+        let choice = row.toString() + ":" + col.toString() + ":" + valueToPayload + ":" + "false";
+        NearbyConnections.sendByteMessage(choice);
 
+        if (this.state.gameIsEnded === true) return;
+    }
+
+    onPressTileAI = (row, col) => {
+        if (this.state.gameIsEnded === true) return; // if the game is ended, there is no reason to continue to render inputs
+
+        let value = this.state.initialPlayer;
+        if (this.props.gameMode === 'AI' && value === -1) return; // if it is the AI turn, there is no reason to allow inputs from the user
+
+        let gameStateClone = this.state.gameState.slice();
+        if (gameStateClone[row][col] !== 0) return; // if the tile is already dirty, there is no reason to allow input in that tile
+
+        gameStateClone[row][col] = value;
+
+        value = value * -1;
+
+        this.setState({
+            gameState: gameStateClone,
+            initialPlayer: value
+        }, () => {
+            let win = this.isThereAWinner(); // Verify if the user won, lost or there is a tie
+            if (win === 1 || win === -1 || win === 2) return;
+
+            if (win === 0) {
+                setTimeout(() => {
+                    this.letAIPlay();
+                    this.isThereAWinner(); // Verify if the machine has won the game...
+                }, 1500);
+            }
+
+
+        });
     }
 
     getRandomNumber = (value) => {
@@ -297,6 +349,7 @@ export default class Game extends Component {
 
     onRestartPress = () => {
         this.initializeGame();
+        NearbyConnections.sendByteMessage("0:0:0:true"); // code to restart the game (row, col, choice, restart)
     }
 
     render() {
@@ -364,45 +417,47 @@ export default class Game extends Component {
                             editable={false}
                         />
                     </View>
-                    {/*  */}
+
+                    {/* End of the Players' header and begin of the tiles */}
+
                     <View style={{ flex: 9 }}>
                         <View style={{ flexDirection: 'row' }}>
-                            <TouchableOpacity onPress={() => this.onPressTile(0, 0)} style={[(this.state.isDarkMode ? stylesDarkMode.tile : stylesLightMode.tile), { borderLeftWidth: 0, borderTopWidth: 0 }]}>
+                            <TouchableOpacity onPress={() => this.props.gameMode === 'versus' ? this.onPressTileVersus(0, 0) : this.onPressTileAI(0, 0)} style={[(this.state.isDarkMode ? stylesDarkMode.tile : stylesLightMode.tile), { borderLeftWidth: 0, borderTopWidth: 0 }]}>
                                 {this.renderIcon(0, 0)}
                             </TouchableOpacity>
-                            <TouchableOpacity onPress={() => this.onPressTile(0, 1)} style={[(this.state.isDarkMode ? stylesDarkMode.tile : stylesLightMode.tile), { borderTopWidth: 0 }]}>
+                            <TouchableOpacity onPress={() => this.props.gameMode === 'versus' ? this.onPressTileVersus(0, 1) : this.onPressTileAI(0, 1)} style={[(this.state.isDarkMode ? stylesDarkMode.tile : stylesLightMode.tile), { borderTopWidth: 0 }]}>
                                 {this.renderIcon(0, 1)}
                             </TouchableOpacity>
-                            <TouchableOpacity onPress={() => this.onPressTile(0, 2)} style={[(this.state.isDarkMode ? stylesDarkMode.tile : stylesLightMode.tile), { borderRightWidth: 0, borderTopWidth: 0 }]}>
+                            <TouchableOpacity onPress={() => this.props.gameMode === 'versus' ? this.onPressTileVersus(0, 2) : this.onPressTileAI(0, 2)} style={[(this.state.isDarkMode ? stylesDarkMode.tile : stylesLightMode.tile), { borderRightWidth: 0, borderTopWidth: 0 }]}>
                                 {this.renderIcon(0, 2)}
                             </TouchableOpacity>
                         </View>
 
                         <View style={{ flexDirection: 'row' }}>
-                            <TouchableOpacity onPress={() => this.onPressTile(1, 0)} style={[(this.state.isDarkMode ? stylesDarkMode.tile : stylesLightMode.tile), { borderLeftWidth: 0 }]}>
+                            <TouchableOpacity onPress={() => this.props.gameMode === 'versus' ? this.onPressTileVersus(1, 0) : this.onPressTileAI(1, 0)} style={[(this.state.isDarkMode ? stylesDarkMode.tile : stylesLightMode.tile), { borderLeftWidth: 0 }]}>
                                 {this.renderIcon(1, 0)}
                             </TouchableOpacity>
-                            <TouchableOpacity onPress={() => this.onPressTile(1, 1)} style={[(this.state.isDarkMode ? stylesDarkMode.tile : stylesLightMode.tile), {}]}>
+                            <TouchableOpacity onPress={() => this.props.gameMode === 'versus' ? this.onPressTileVersus(1, 1) : this.onPressTileAI(1, 1)} style={[(this.state.isDarkMode ? stylesDarkMode.tile : stylesLightMode.tile), {}]}>
                                 {this.renderIcon(1, 1)}
                             </TouchableOpacity>
-                            <TouchableOpacity onPress={() => this.onPressTile(1, 2)} style={[(this.state.isDarkMode ? stylesDarkMode.tile : stylesLightMode.tile), { borderRightWidth: 0 }]}>
+                            <TouchableOpacity onPress={() => this.props.gameMode === 'versus' ? this.onPressTileVersus(1, 2) : this.onPressTileAI(1, 2)} style={[(this.state.isDarkMode ? stylesDarkMode.tile : stylesLightMode.tile), { borderRightWidth: 0 }]}>
                                 {this.renderIcon(1, 2)}
                             </TouchableOpacity>
                         </View>
 
                         <View style={{ flexDirection: 'row' }}>
-                            <TouchableOpacity onPress={() => this.onPressTile(2, 0)} style={[(this.state.isDarkMode ? stylesDarkMode.tile : stylesLightMode.tile), { borderLeftWidth: 0, borderBottomWidth: 0 }]}>
+                            <TouchableOpacity onPress={() => this.props.gameMode === 'versus' ? this.onPressTileVersus(2, 0) : this.onPressTileAI(2, 0)} style={[(this.state.isDarkMode ? stylesDarkMode.tile : stylesLightMode.tile), { borderLeftWidth: 0, borderBottomWidth: 0 }]}>
                                 {this.renderIcon(2, 0)}
                             </TouchableOpacity>
-                            <TouchableOpacity onPress={() => this.onPressTile(2, 1)} style={[(this.state.isDarkMode ? stylesDarkMode.tile : stylesLightMode.tile), { borderBottomWidth: 0 }]}>
+                            <TouchableOpacity onPress={() => this.props.gameMode === 'versus' ? this.onPressTileVersus(2, 1) : this.onPressTileAI(2, 1)} style={[(this.state.isDarkMode ? stylesDarkMode.tile : stylesLightMode.tile), { borderBottomWidth: 0 }]}>
                                 {this.renderIcon(2, 1)}
                             </TouchableOpacity>
-                            <TouchableOpacity onPress={() => this.onPressTile(2, 2)} style={[(this.state.isDarkMode ? stylesDarkMode.tile : stylesLightMode.tile), { borderBottomWidth: 0, borderRightWidth: 0 }]}>
+                            <TouchableOpacity onPress={() => this.props.gameMode === 'versus' ? this.onPressTileVersus(2, 2) : this.onPressTileAI(2, 2)} style={[(this.state.isDarkMode ? stylesDarkMode.tile : stylesLightMode.tile), { borderBottomWidth: 0, borderRightWidth: 0 }]}>
                                 {this.renderIcon(2, 2)}
                             </TouchableOpacity>
                         </View>
 
-                        <View style={{marginTop: 20, justifyContent: "center", alignItems: "center"}}>
+                        <View style={{ marginTop: 20, justifyContent: "center", alignItems: "center" }}>
                             <Button
                                 type="outline"
                                 title="RESTART GAME"

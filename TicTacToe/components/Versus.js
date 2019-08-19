@@ -43,6 +43,20 @@ export default class Versus extends Component {
             if (e.event === "EndpointFound")
                 Actions.devices();
         });
+
+        this.subscription = DeviceEventEmitter.addListener('onConnectionResult', (e) => {
+            if (e.event === "Connected") {
+                if (this.state.advertising && !this.state.discovering) { // because the discovering will go to the Game screen from the device list
+                    Actions.game({
+                        gameMode: 'versus',
+                        player1: 'Player 1',
+                        player2: 'Player 2',
+                        advertising: true,
+                        discovering: false
+                    });
+                }
+            }
+        });
     }
 
     componentWillUnmount() {
@@ -85,7 +99,7 @@ export default class Versus extends Component {
                     {this.state.discovering ? (
                         <TouchableOpacity
                             style={this.state.isDarkMode ? stylesDarkMode.versusPerson : stylesLightMode.versusPerson}
-                            >
+                        >
                             <Text style={this.state.isDarkMode ? stylesDarkMode.Text : stylesLightMode.Text}>Descobrindo...</Text>
                         </TouchableOpacity>
                     ) : (

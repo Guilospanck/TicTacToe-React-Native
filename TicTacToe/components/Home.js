@@ -10,6 +10,7 @@ import { Actions } from "react-native-router-flux";
 
 import GLOBALS from './Globals'
 import Header from "./Header";
+import NearbyConnections from './NearbyConnections';
 
 
 export default class Home extends Component {
@@ -26,6 +27,8 @@ export default class Home extends Component {
                 isDarkMode: value
             });
         });
+
+        NearbyConnections.disconnect();
     }
 
     onGameModeSelector = (value) => {

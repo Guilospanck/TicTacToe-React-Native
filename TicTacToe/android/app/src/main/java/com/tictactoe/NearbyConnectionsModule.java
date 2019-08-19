@@ -51,7 +51,6 @@ import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.Callback;
-import com.google.gson.Gson;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -69,6 +68,7 @@ public class NearbyConnectionsModule extends ReactContextBaseJavaModule {
 
     private static final Strategy STRATEGY = Strategy.P2P_POINT_TO_POINT; // 1 - 1 TicTacToe only enables the game for max of 2 players
 
+
     // our handle to Nearby Connections
     private ConnectionsClient connectionsClients;
 
@@ -80,6 +80,8 @@ public class NearbyConnectionsModule extends ReactContextBaseJavaModule {
     private int coordinatesRow;
     private int coordinatesCol;
     private String choice;
+    private String winner;
+    private String restart;
 
     ArrayList<String> endpointsList;
     Map<String, String> endpointsAndDeviceNames;
@@ -130,20 +132,6 @@ public class NearbyConnectionsModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void getEndpointsList(Callback successCallback){
-//        try {
-//            WritableArray array = new WritableNativeArray();
-//            Set<String> noDuplicate = new HashSet<>();
-//            noDuplicate.addAll(endpointsList);
-//
-//            for (String item: noDuplicate) {
-//                array.pushString(item);
-//            }
-//            successCallback.invoke(array);
-//
-//        } catch (Exception e) {
-//            Toast.makeText(context, "GetEndpointList: " + e, Toast.LENGTH_LONG).show();
-//        }
-
         try {
             WritableMap map = new WritableNativeMap();
 
@@ -165,13 +153,12 @@ public class NearbyConnectionsModule extends ReactContextBaseJavaModule {
                 .addOnSuccessListener(
                         (Void unused) -> {
                             // We successfully requested a connection. Now both sides must
-                            // accept before the connection is established.
-                            Toast.makeText(context, "Both sides need to accept the connection...", Toast.LENGTH_LONG).show();
+                            // accept before the connection is established
                         })
                 .addOnFailureListener(
                         (Exception e) -> {
                             // Nearby connections failed to request the connection.
-                            Toast.makeText(context, "Nearby connections failed to request the connection.", Toast.LENGTH_LONG).show();
+                            Toast.makeText(context, "Nearby connections failed to request the connection. " + e, Toast.LENGTH_LONG).show();
                         });
     }
 
@@ -179,11 +166,24 @@ public class NearbyConnectionsModule extends ReactContextBaseJavaModule {
     private final PayloadCallback payloadCallback = new PayloadCallback() {
         @Override
         public void onPayloadReceived(@NonNull String endpointId, @NonNull Payload payload) {
-            String[] result = new String(payload.asBytes(), UTF_8).split(":", 3);
+            String[] result = new String(payload.asBytes(), UTF_8).split(":", 4);
 
             coordinatesRow = Integer.parseInt(result[0]);
             coordinatesCol = Integer.parseInt(result[1]);
             choice = result[2];
+            restart = result[3];
+//            winner = result[4];
+
+            // send an event to the react native app
+            WritableMap params = Arguments.createMap();
+            params.putString("event", "PayloadReceived");
+            params.putString("choice", choice);
+            params.putInt("row", coordinatesRow);
+            params.putInt("col", coordinatesCol);
+            params.putString("restart", restart);
+//            params.putString("winner", winner);
+            getReactApplicationContext().getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+            .emit("onPayloadReceived", params);
         }
 
         @Override
@@ -221,21 +221,8 @@ public class NearbyConnectionsModule extends ReactContextBaseJavaModule {
     private final ConnectionLifecycleCallback connectionLifecycleCallback = new ConnectionLifecycleCallback() {
         @Override
         public void onConnectionInitiated(@NonNull String endpointId, @NonNull ConnectionInfo connectionInfo) {
-            new AlertDialog.Builder(context)
-                    .setTitle("Accept connection to " + connectionInfo.getEndpointName())
-                    .setMessage("Confirm the code matches on both devices: " + connectionInfo.getAuthenticationToken())
-                    .setPositiveButton(
-                            "Accept",
-                            (DialogInterface dialog, int which) ->
-                                    // The user confirmed, so we can accept the connection
-                                    connectionsClients.acceptConnection(endpointId, payloadCallback))
-                    .setNegativeButton(
-                            android.R.string.cancel,
-                            (DialogInterface dialog, int which) ->
-                                    // The user canceled, so we should reject the connection.
-                                    connectionsClients.rejectConnection(endpointId))
-                    .setIcon(android.R.drawable.ic_dialog_alert)
-                    .show();
+            // Automatically accepts the connection in both sides
+            connectionsClients.acceptConnection(endpointId, payloadCallback);
         }
 
         @Override
@@ -243,19 +230,30 @@ public class NearbyConnectionsModule extends ReactContextBaseJavaModule {
             switch (result.getStatus().getStatusCode()){
                 case ConnectionsStatusCodes.STATUS_OK:
                     // We're connected! Can now start sending and receiving data.
+                    Toast.makeText(context, "We're connected! STATUS_OK", Toast.LENGTH_SHORT).show();
                     // We don't need to advertise and discovery anymore
                     connectionsClients.stopAdvertising();
                     connectionsClients.stopDiscovery();
                     opponentEndpointId = endpointId;
+
+                    // send an event to the react native app
+                    WritableMap params = Arguments.createMap();
+                    params.putString("event", "Connected");
+                    getReactApplicationContext().getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+                    .emit("onConnectionResult", params);
+
                     break;
                 case ConnectionsStatusCodes.STATUS_CONNECTION_REJECTED:
                     // The connections was rejected by one or both sides.
+                    Toast.makeText(context, "Connection Rejected!", Toast.LENGTH_LONG).show();
                     break;
                 case ConnectionsStatusCodes.STATUS_ERROR:
                     // The connection broke before it was able to be accepted.
+                    Toast.makeText(context, "Connection Error!", Toast.LENGTH_LONG).show();
                     break;
                 default:
                      // Unknown status code
+                    Toast.makeText(context, "Something went wrong in the ConnectionResult.", Toast.LENGTH_LONG).show();
             }
         }
 
@@ -263,6 +261,7 @@ public class NearbyConnectionsModule extends ReactContextBaseJavaModule {
         public void onDisconnected(@NonNull String endpointId) {
             // We've been disconnected from this endpoint. No more data can be
             // sent or received.
+            Toast.makeText(context, "Disconnected!", Toast.LENGTH_LONG).show();
         }
     };
 
@@ -271,7 +270,7 @@ public class NearbyConnectionsModule extends ReactContextBaseJavaModule {
     * .startAdvertising(userNickname, serviceId, connectionCallback, advertisingOptions);
     *   - serviceId: must be uniquely to identify the app (usually it is used the app package name)
     *   - connectionCallback: function that will be call when some device request to connect with the advertiser.
-    *   - advertisinOptions: informs the strategy of the communication
+    *   - advertisingOptions: informs the strategy of the communication
     * */
     @ReactMethod
     public void startAdvertising(String user, Callback successCallback){
