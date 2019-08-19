@@ -44,7 +44,7 @@ export default class Game extends Component {
             if (e.event === "PayloadReceived") {
 
                 if(e.restart === "true"){
-                    this.onRestartPress();
+                    this.restartGamePayload();
                     return;
                 }
 
@@ -190,7 +190,7 @@ export default class Game extends Component {
         this.isThereAWinner();
 
         /** Send choices to the other device */
-        let choice = row.toString() + ":" + col.toString() + ":" + valueToPayload + ":" + "false";
+        let choice = row.toString() + ":" + col.toString() + ":" + valueToPayload + ":false";
         NearbyConnections.sendByteMessage(choice);
 
         if (this.state.gameIsEnded === true) return;
@@ -350,6 +350,10 @@ export default class Game extends Component {
     onRestartPress = () => {
         this.initializeGame();
         NearbyConnections.sendByteMessage("0:0:0:true"); // code to restart the game (row, col, choice, restart)
+    }
+
+    restartGamePayload = () => {
+        this.initializeGame();
     }
 
     render() {
