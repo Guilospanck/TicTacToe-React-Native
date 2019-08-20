@@ -91,7 +91,7 @@ export default class Game extends Component {
                 }
             }
         });
-    
+
         /** Disconnected event */
         this.disconnectedSubscription = DeviceEventEmitter.addListener('onDisconnected', (e) => {
             if (e.event === 'Disconnected')
@@ -293,7 +293,7 @@ export default class Game extends Component {
         } else this.randomAI();
     }
 
-    verififyTicTacToeMatrix = () => {
+    aiMustWin = () => {
         let rowsSum = 0;
         let colsSum = 0;
         let gameState = this.state.gameState.slice();
@@ -306,10 +306,6 @@ export default class Game extends Component {
             if (rowsSum === -2) {
                 return [gameState, 'row', i];
             } else if (colsSum === -2) {
-                return [gameState, 'col', i];
-            } else if (rowsSum === 2) {
-                return [gameState, 'row', i];
-            } else if (colsSum === 2) {
                 return [gameState, 'col', i];
             }
 
@@ -324,12 +320,51 @@ export default class Game extends Component {
             return [gameState, 'primaryDiag', null];
         } else if (diag2Sum === -2) {
             return [gameState, 'secondaryDiag', null];
-        } else if (diag1Sum === 2) {
+        } else {
+            return [gameState, 'none', null];
+        }
+    }
+
+    playerMustWin = () => {
+        let rowsSum = 0;
+        let colsSum = 0;
+        let gameState = this.state.gameState.slice();
+
+        for (let i = 0; i < 3; i++) {
+            for (let j = 0; j < 3; j++) {
+                rowsSum = gameState[i][j] + rowsSum;
+                colsSum = gameState[j][i] + colsSum;
+            }
+            if (rowsSum === 2) {
+                return [gameState, 'row', i];
+            } else if (colsSum === 2) {
+                return [gameState, 'col', i];
+            }
+
+            rowsSum = 0;
+            colsSum = 0;
+        }
+
+        let diag1Sum = gameState[0][0] + gameState[1][1] + gameState[2][2];
+        let diag2Sum = gameState[0][2] + gameState[1][1] + gameState[2][0];
+
+        if (diag1Sum === 2) {
             return [gameState, 'primaryDiag', null];
         } else if (diag2Sum === 2) {
             return [gameState, 'secondaryDiag', null];
         } else {
             return [gameState, 'none', null];
+        }
+    }
+
+    verififyTicTacToeMatrix = () => {
+
+        [gameState, result, rowOrCol] = this.aiMustWin();
+
+        if (result === 'none') {
+            return this.playerMustWin();           
+        } else {
+            return [gameState, result, rowOrCol];
         }
     }
 
@@ -352,7 +387,7 @@ export default class Game extends Component {
     letAIPlay() {
         [gameState, result, rowOrCol] = this.verififyTicTacToeMatrix();
 
-        if (result === 'none') { // there is no way that the other can win now
+        if (result === 'none') { // there is no way that the other can win now or the AI
             this.randomAI();
         } else {
             if (result === 'row' || result === 'col') {
@@ -385,18 +420,18 @@ export default class Game extends Component {
         });
     }
 
-    
+
     onRestartPress = () => {
         this.initializeGame();
         let pattern = this.state.patternValue;
         pattern = pattern * -1;
-        this.setState({ initialPlayer: pattern, patternValue: pattern}, () => {
-            if(pattern == -1 && this.props.gameMode === 'AI'){
+        this.setState({ initialPlayer: pattern, patternValue: pattern }, () => {
+            if (pattern == -1 && this.props.gameMode === 'AI') {
                 this.letAIPlay();
             }
-        });        
+        });
 
-        if(this.props.gameMode === 'versus')
+        if (this.props.gameMode === 'versus')
             NearbyConnections.sendByteMessage("0:0:0:true:false:false:none"); // code to restart the game (row,col,choice,restart,advertising,discovering,playersName)
     }
 
@@ -404,7 +439,7 @@ export default class Game extends Component {
         this.initializeGame();
         let pattern = this.state.patternValue;
         pattern = pattern * -1;
-        this.setState({ initialPlayer: pattern, patternValue: pattern});
+        this.setState({ initialPlayer: pattern, patternValue: pattern });
     }
 
     render() {
