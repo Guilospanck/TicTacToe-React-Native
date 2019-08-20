@@ -85,7 +85,6 @@ public class NearbyConnectionsModule extends ReactContextBaseJavaModule {
     private String discovering;
     private String player;
 
-    ArrayList<String> endpointsList;
     Map<String, String> endpointsAndDeviceNames;
 
 
@@ -96,7 +95,6 @@ public class NearbyConnectionsModule extends ReactContextBaseJavaModule {
 
         connectionsClients = Nearby.getConnectionsClient(context);
 
-        endpointsList = new ArrayList<>();
         endpointsAndDeviceNames = new HashMap<>();
     }
 
@@ -123,18 +121,11 @@ public class NearbyConnectionsModule extends ReactContextBaseJavaModule {
         connectionsClients.stopAllEndpoints();
     }
 
-    @ReactMethod
-    public void getPositionsAndChoices(Callback successCallback) {
-        try {
-            successCallback.invoke(coordinatesRow, coordinatesCol, choice);
-        } catch (Exception e) {
-            Toast.makeText(context, "getPositionsAndChoices: something went wrong! " + e, Toast.LENGTH_LONG).show();
-        }
-    }
 
     @ReactMethod
     public void getEndpointsList(Callback successCallback){
         try {
+
             WritableMap map = new WritableNativeMap();
 
             for(Map.Entry<String, String> entry : endpointsAndDeviceNames.entrySet()){
@@ -216,12 +207,28 @@ public class NearbyConnectionsModule extends ReactContextBaseJavaModule {
             getReactApplicationContext().getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
             .emit("onEndpointFound", params);
 
-            endpointsList.add(endpointId);
             endpointsAndDeviceNames.put(endpointId, info.getEndpointName());
+
+            /* Create an event to populate the device list */
+            WritableMap map = new WritableNativeMap();
+
+            for(Map.Entry<String, String> entry : endpointsAndDeviceNames.entrySet()){
+                map.putString(entry.getKey(), entry.getValue());
+            }
+
+            getReactApplicationContext().getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+                    .emit("onEndpointFoundPopulateList", map);
+
+            clearEndpointList();
         }
 
         @Override
         public void onEndpointLost(@NonNull String endpointId) {
+            clearEndpointList();
+
+            WritableMap map = new WritableNativeMap();
+            getReactApplicationContext().getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+                    .emit("onEndpointFoundPopulateList", map);
 
         }
     };
@@ -257,14 +264,31 @@ public class NearbyConnectionsModule extends ReactContextBaseJavaModule {
                 case ConnectionsStatusCodes.STATUS_CONNECTION_REJECTED:
                     // The connections was rejected by one or both sides.
                     Toast.makeText(context, "Connection Rejected!", Toast.LENGTH_LONG).show();
+
+                    // send an event to the react native app
+                    WritableMap params1 = Arguments.createMap();
+                    params1.putString("event", "ConnectionRejected");
+                    getReactApplicationContext().getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+                            .emit("onConnectionRejected", params1);
                     break;
                 case ConnectionsStatusCodes.STATUS_ERROR:
                     // The connection broke before it was able to be accepted.
                     Toast.makeText(context, "Connection Error!", Toast.LENGTH_LONG).show();
+
+                    // send an event to the react native app
+                    WritableMap params2 = Arguments.createMap();
+                    params2.putString("event", "ConnectionError");
+                    getReactApplicationContext().getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+                            .emit("onConnectionError", params2);
                     break;
                 default:
                      // Unknown status code
                     Toast.makeText(context, "Something went wrong in the ConnectionResult.", Toast.LENGTH_LONG).show();
+                    // send an event to the react native app
+                    WritableMap params3 = Arguments.createMap();
+                    params3.putString("event", "ConnectionWrong");
+                    getReactApplicationContext().getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+                            .emit("onConnectionSomethingWrong", params3);
             }
         }
 

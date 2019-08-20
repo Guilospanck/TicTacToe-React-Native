@@ -24,17 +24,9 @@ export default class DevicesList extends Component {
             isDarkMode: false,
             endpointList: [],
             infoEndpointName: [],
-            refreshing: false
+            refreshing: false,
+            deviceSelected: false
         }
-
-        NearbyConnections.getEndpointsList((endpointList) => {
-            let list = Object.keys(endpointList); // get the endpointsId
-            let info = Object.values(endpointList); // getTheDiscoveryEndpointInfo(name)
-            this.setState({
-                endpointList: list,
-                infoEndpointName: info
-            });
-        });
     }
 
     componentDidMount() {
@@ -44,17 +36,17 @@ export default class DevicesList extends Component {
             });
         });
 
-        NearbyConnections.getEndpointsList((endpointList) => {
-            let list = Object.keys(endpointList); // get the endpointsId
-            let info = Object.values(endpointList); // getTheDiscoveryEndpointInfo(name)
+        this.getEndpointListSubscription = DeviceEventEmitter.addListener('onEndpointFoundPopulateList', (e) => {
+            let list = Object.keys(e); // get the endpointsId
+            let info = Object.values(e); // getTheDiscoveryEndpointInfo(name)
             this.setState({
                 endpointList: list,
                 infoEndpointName: info
             });
         });
 
-
         this.subscription = DeviceEventEmitter.addListener('onConnectionResult', (e) => {
+            this.setState({deviceSelected: false});
             if (e.event === "Connected")
                 Actions.reset('game', {
                     gameMode: 'versus',
@@ -63,10 +55,26 @@ export default class DevicesList extends Component {
                     advertising: false
                 });
         });
+
+        this.connectionRejectedSubscription = DeviceEventEmitter.addListener('onConnectionRejected', (e) => {
+            this.setState({deviceSelected: false});
+        });
+
+        this.connectionErrorSubscription = DeviceEventEmitter.addListener('onConnectionError', (e) => {
+            this.setState({deviceSelected: false});
+        });
+
+        this.connectionWrongSubscription = DeviceEventEmitter.addListener('onConnectionSomethingWrong', (e) => {
+            this.setState({deviceSelected: false});
+        });
     }
 
     componentWillUnmount() {
+        this.getEndpointListSubscription.remove();
         this.subscription.remove();
+        this.connectionRejectedSubscription.remove();
+        this.connectionErrorSubscription.remove();
+        this.connectionWrongSubscription.remove();
     }
 
     onSwitchChange = () => {
@@ -82,6 +90,8 @@ export default class DevicesList extends Component {
     }
 
     handleRefresh = () => {
+        if(this.state.deviceSelected === true) return;
+
         this.setState({ refreshing: true }, () => {
 
             NearbyConnections.getEndpointsList((endpointList) => {
@@ -97,7 +107,10 @@ export default class DevicesList extends Component {
     }
 
     onDeviceClick = (item) => {
+        if(this.state.deviceSelected === true) return;
+
         this.requestConnection(item);
+        this.setState({deviceSelected: true});
     }
 
 
@@ -129,12 +142,21 @@ export default class DevicesList extends Component {
                                 subtitleStyle={this.state.isDarkMode ? stylesDarkMode.Text : stylesLightMode.Text}
                                 bottomDivider={true}
                                 topDivider={true}
+                                disabled={this.state.deviceSelected}
                             />
                         )}
                         keyExtractor={(item, index) => index.toString()}
                         refreshing={this.state.refreshing}
                         onRefresh={() => this.handleRefresh()}
+                        ListEmptyComponent={<View><Text>No nearby devices...</Text></View>}
                     />
+                    <Fragment>
+                        {this.state.deviceSelected ? (
+                            <View><Text>Connecting...</Text></View>
+                        ) : (
+                            <Fragment></Fragment>
+                        )}
+                    </Fragment>
                 </View>
             </Fragment>
         )

@@ -42,9 +42,7 @@ export default class ArrowHeader extends Component {
     }
 
     goBack() {
-        // Actions.home();
-        // Actions.reset("home");
-        Actions.popTo("home");
+        Actions.reset("home");
     }
 
     render() {
