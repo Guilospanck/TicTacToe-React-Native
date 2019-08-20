@@ -18,6 +18,8 @@ import ArrowHeader from "./ArrowHeader";
 import NearbyConnections from './NearbyConnections';
 
 export default class DevicesList extends Component {
+    _isMounted = false;
+
     constructor() {
         super();
         this.state = {
@@ -30,6 +32,8 @@ export default class DevicesList extends Component {
     }
 
     componentDidMount() {
+        this._isMounted = true;
+
         GLOBALS.getStoreData('darkMode').then((value) => {
             this.setState({
                 isDarkMode: value
@@ -39,14 +43,18 @@ export default class DevicesList extends Component {
         this.getEndpointListSubscription = DeviceEventEmitter.addListener('onEndpointFoundPopulateList', (e) => {
             let list = Object.keys(e); // get the endpointsId
             let info = Object.values(e); // getTheDiscoveryEndpointInfo(name)
-            this.setState({
-                endpointList: list,
-                infoEndpointName: info
-            });
+
+            if (this._isMounted) {
+                this.setState({
+                    endpointList: list,
+                    infoEndpointName: info
+                });
+            }
         });
 
         this.subscription = DeviceEventEmitter.addListener('onConnectionResult', (e) => {
-            this.setState({deviceSelected: false});
+            if (this._isMounted) this.setState({ deviceSelected: false });
+
             if (e.event === "Connected")
                 Actions.reset('game', {
                     gameMode: 'versus',
@@ -56,30 +64,16 @@ export default class DevicesList extends Component {
                 });
         });
 
-        this.connectionRejectedSubscription = DeviceEventEmitter.addListener('onConnectionRejected', (e) => {
-            this.setState({deviceSelected: false});
-        });
-
         this.connectionErrorSubscription = DeviceEventEmitter.addListener('onConnectionError', (e) => {
-            this.setState({deviceSelected: false});
-        });
-
-        this.connectionWrongSubscription = DeviceEventEmitter.addListener('onConnectionSomethingWrong', (e) => {
-            this.setState({deviceSelected: false});
-        });
-
-        this.failureListenerDescription = DeviceEventEmitter.addListener('onFailureListener', (e) => {
-            this.setState({deviceSelected: false});
+            this.setState({ deviceSelected: false });
         });
     }
 
     componentWillUnmount() {
+        this._isMounted = false;
         this.getEndpointListSubscription.remove();
         this.subscription.remove();
-        this.connectionRejectedSubscription.remove();
         this.connectionErrorSubscription.remove();
-        this.connectionWrongSubscription.remove();
-        this.failureListenerDescription.remove();
     }
 
     onSwitchChange = () => {
@@ -95,7 +89,7 @@ export default class DevicesList extends Component {
     }
 
     handleRefresh = () => {
-        if(this.state.deviceSelected === true) return;
+        if (this.state.deviceSelected === true) return;
 
         this.setState({ refreshing: true }, () => {
 
@@ -112,10 +106,10 @@ export default class DevicesList extends Component {
     }
 
     onDeviceClick = (item) => {
-        if(this.state.deviceSelected === true) return;
+        if (this.state.deviceSelected === true) return;
 
         this.requestConnection(item);
-        this.setState({deviceSelected: true});
+        this.setState({ deviceSelected: true });
     }
 
 
@@ -153,14 +147,17 @@ export default class DevicesList extends Component {
                         keyExtractor={(item, index) => index.toString()}
                         refreshing={this.state.refreshing}
                         onRefresh={() => this.handleRefresh()}
-                        ListEmptyComponent={<View style={{ alignItems: "center", marginTop: 200 }}><Text style={[this.state.isDarkMode ? stylesDarkMode.Text : stylesLightMode.Text, { fontSize: 20 }]}>No nearby devices...</Text></View>}
+                        ListEmptyComponent={<View style={{ alignItems: "center", marginTop: 200 }}>
+                            <Text style={[this.state.isDarkMode ? stylesDarkMode.Text : stylesLightMode.Text, { fontSize: 20 }]}>No nearby devices...</Text>
+                            <Text style={[this.state.isDarkMode ? stylesDarkMode.Text : stylesLightMode.Text, { fontSize: 14 }]}>Swipe down to update</Text>
+                            </View>}
                     />
                     <Fragment>
                         {this.state.deviceSelected ? (
                             <View style={{ alignItems: "center", marginBottom: 10 }}><Text style={[this.state.isDarkMode ? stylesDarkMode.Text : stylesLightMode.Text, { fontSize: 20 }]}>Connecting...</Text></View>
                         ) : (
-                            <Fragment></Fragment>
-                        )}
+                                <Fragment></Fragment>
+                            )}
                     </Fragment>
                 </View>
             </Fragment>

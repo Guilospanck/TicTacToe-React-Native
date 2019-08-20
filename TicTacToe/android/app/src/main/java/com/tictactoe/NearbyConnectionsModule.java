@@ -159,9 +159,8 @@ public class NearbyConnectionsModule extends ReactContextBaseJavaModule {
 
                             // send an event to the react native app
                             WritableMap params2 = Arguments.createMap();
-                            params2.putString("event", "FailureListener");
                             getReactApplicationContext().getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
-                                    .emit("onFailureListener", params2);
+                                    .emit("onConnectionError", params2);
                         });
     }
 
@@ -228,9 +227,16 @@ public class NearbyConnectionsModule extends ReactContextBaseJavaModule {
 
         @Override
         public void onEndpointLost(@NonNull String endpointId) {
-            clearEndpointList();
 
+            endpointsAndDeviceNames.remove(endpointId);
+
+            /* Create an event to populate the device list */
             WritableMap map = new WritableNativeMap();
+
+            for(Map.Entry<String, String> entry : endpointsAndDeviceNames.entrySet()){
+                map.putString(entry.getKey(), entry.getValue());
+            }
+
             getReactApplicationContext().getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
                     .emit("onEndpointFoundPopulateList", map);
 
@@ -271,9 +277,8 @@ public class NearbyConnectionsModule extends ReactContextBaseJavaModule {
 
                     // send an event to the react native app
                     WritableMap params1 = Arguments.createMap();
-                    params1.putString("event", "ConnectionRejected");
                     getReactApplicationContext().getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
-                            .emit("onConnectionRejected", params1);
+                            .emit("onConnectionError", params1);
                     break;
                 case ConnectionsStatusCodes.STATUS_ERROR:
                     // The connection broke before it was able to be accepted.
@@ -281,7 +286,6 @@ public class NearbyConnectionsModule extends ReactContextBaseJavaModule {
 
                     // send an event to the react native app
                     WritableMap params2 = Arguments.createMap();
-                    params2.putString("event", "ConnectionError");
                     getReactApplicationContext().getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
                             .emit("onConnectionError", params2);
                     break;
@@ -290,9 +294,8 @@ public class NearbyConnectionsModule extends ReactContextBaseJavaModule {
                     Toast.makeText(context, "Something went wrong in the ConnectionResult.", Toast.LENGTH_LONG).show();
                     // send an event to the react native app
                     WritableMap params3 = Arguments.createMap();
-                    params3.putString("event", "ConnectionWrong");
                     getReactApplicationContext().getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
-                            .emit("onConnectionSomethingWrong", params3);
+                            .emit("onConnectionError", params3);
             }
         }
 
