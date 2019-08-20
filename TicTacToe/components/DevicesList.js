@@ -53,12 +53,12 @@ export default class DevicesList extends Component {
             });
         });
 
-        this.subscription = DeviceEventEmitter.addListener('onConnectionResult', function (e) {
+
+        this.subscription = DeviceEventEmitter.addListener('onConnectionResult', (e) => {
             if (e.event === "Connected")
                 Actions.game({
                     gameMode: 'versus',
-                    player1: 'Player 1',
-                    player2: 'Player 2',
+                    player2: this.props.player2,
                     discovering: true,
                     advertising: false
                 });

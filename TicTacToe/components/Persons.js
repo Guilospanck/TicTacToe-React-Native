@@ -36,10 +36,8 @@ export default class Persons extends Component {
 
     onPlayPress = (value) => {
         if(value === 'PVP'){
-            Actions.game({
-                player1: this.state.player1 !== '' ? this.state.player1 : "Jogador 1",
-                player2: this.state.player2 !== '' ? this.state.player2 : "Jogador 2",
-                gameMode: 'versus'
+            Actions.versus({
+                player: this.state.player1 !== '' ? this.state.player1 : "Sem nome",
             });
         } else {
             Actions.game({
@@ -71,7 +69,7 @@ export default class Persons extends Component {
                             <Fragment>
                                 <Input
                                     inputContainerStyle={{ borderWidth: 1, borderRadius: 50 }}
-                                    placeholder=" Insira o nome do Jogador 1"
+                                    placeholder=" Insira o nome do Jogador"
                                     maxLength={11}
                                     leftIcon={
                                         <Icon
@@ -83,23 +81,6 @@ export default class Persons extends Component {
                                     inputStyle={this.state.isDarkMode ? stylesDarkMode.textInputs : stylesLightMode.textInputs}
                                     value={this.state.player1}
                                     onChangeText={(player1) => this.setState({ player1: player1 })}
-                                />
-
-                                <Input
-                                    containerStyle={{ paddingTop: 10 }}
-                                    inputContainerStyle={{ borderWidth: 1, borderRadius: 50 }}
-                                    placeholder=" Insira o nome do Jogador 2"
-                                    maxLength={11}
-                                    leftIcon={
-                                        <Icon
-                                            name='user'
-                                            size={24}
-                                            color={this.state.isDarkMode ? '#fff' : '#6200EE'}
-                                        />
-                                    }
-                                    inputStyle={this.state.isDarkMode ? stylesDarkMode.textInputs : stylesLightMode.textInputs}
-                                    value={this.state.player2}
-                                    onChangeText={(player2) => this.setState({ player2: player2 })}
                                 />
                                 <Button
                                     type="outline"

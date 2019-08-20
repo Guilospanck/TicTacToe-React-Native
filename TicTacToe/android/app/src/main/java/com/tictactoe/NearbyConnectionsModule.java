@@ -80,8 +80,10 @@ public class NearbyConnectionsModule extends ReactContextBaseJavaModule {
     private int coordinatesRow;
     private int coordinatesCol;
     private String choice;
-    private String winner;
     private String restart;
+    private String advertising;
+    private String discovering;
+    private String player;
 
     ArrayList<String> endpointsList;
     Map<String, String> endpointsAndDeviceNames;
@@ -166,13 +168,15 @@ public class NearbyConnectionsModule extends ReactContextBaseJavaModule {
     private final PayloadCallback payloadCallback = new PayloadCallback() {
         @Override
         public void onPayloadReceived(@NonNull String endpointId, @NonNull Payload payload) {
-            String[] result = new String(payload.asBytes(), UTF_8).split(":", 4);
+            String[] result = new String(payload.asBytes(), UTF_8).split(":", 7);
 
             coordinatesRow = Integer.parseInt(result[0]);
             coordinatesCol = Integer.parseInt(result[1]);
             choice = result[2];
             restart = result[3];
-//            winner = result[4];
+            advertising = (!result[4].equals("")) ? result[4] : "";
+            discovering = (!result[5].equals("")) ? result[5] : "";
+            player = (!result[6].equals("")) ? result[6] : "";
 
             // send an event to the react native app
             WritableMap params = Arguments.createMap();
@@ -181,7 +185,10 @@ public class NearbyConnectionsModule extends ReactContextBaseJavaModule {
             params.putInt("row", coordinatesRow);
             params.putInt("col", coordinatesCol);
             params.putString("restart", restart);
-//            params.putString("winner", winner);
+            params.putString("advertising", advertising);
+            params.putString("discovering", discovering);
+            params.putString("player", player);
+
             getReactApplicationContext().getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
             .emit("onPayloadReceived", params);
         }
@@ -262,6 +269,12 @@ public class NearbyConnectionsModule extends ReactContextBaseJavaModule {
             // We've been disconnected from this endpoint. No more data can be
             // sent or received.
             Toast.makeText(context, "Disconnected!", Toast.LENGTH_LONG).show();
+
+            // send an event to the react native app
+            WritableMap params = Arguments.createMap();
+            params.putString("event", "Disconnected");
+            getReactApplicationContext().getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+                    .emit("onDisconnected", params);
         }
     };
 

@@ -13,6 +13,7 @@ import { Input, Button } from 'react-native-elements';
 import GLOBALS from './Globals'
 import ArrowHeader from "./ArrowHeader";
 import NearbyConnections from './NearbyConnections';
+import { Actions } from "react-native-router-flux";
 
 export default class Game extends Component {
 
@@ -22,6 +23,9 @@ export default class Game extends Component {
             initialPlayer: 1,
             gameIsEnded: false,
             isDarkMode: false,
+            patternValue: 1,
+            player1: 'Carregando...',
+            player2: 'Carregando...',
             gameState: [
                 [0, 0, 0],
                 [0, 0, 0],
@@ -39,35 +43,64 @@ export default class Game extends Component {
 
         this.initializeGame();
 
+        /** Exchange names Payload and local */
+        let advertisingOrDiscovering;
+        if (this.props.advertising) {
+            advertisingOrDiscovering = "true:false:" + this.props.player1;
+            this.setState({ player1: this.props.player1 });
+        }
+        else if (this.props.discovering) {
+            advertisingOrDiscovering = "false:true:" + this.props.player2;
+            this.setState({ player2: this.props.player2 });
+        }
+
+        let namesPayload = "0:0:0:false:" + advertisingOrDiscovering; // row,col,choice,restart,advertising,discovering,playersName
+        NearbyConnections.sendByteMessage(namesPayload);
+
+
         /** Receive choices from the other device */
         this.subscription = DeviceEventEmitter.addListener('onPayloadReceived', (e) => {
             if (e.event === "PayloadReceived") {
 
-                if(e.restart === "true"){
-                    this.restartGamePayload();
-                    return;
+                if (e.advertising === 'true' || e.discovering === 'true') {
+                    /** Exchange names */
+                    if (e.advertising === 'true') this.setState({ player1: e.player });
+                    if (e.discovering === 'true') this.setState({ player2: e.player });
+                } else {
+
+                    if (e.restart === "true") {
+                        this.restartGamePayload();
+                        return;
+                    }
+
+                    let gameStateClone = this.state.gameState.slice();
+                    let value = parseInt(e.choice);
+
+                    gameStateClone[e.row][e.col] = value;
+
+                    value = value * -1;
+
+                    this.setState({
+                        gameState: gameStateClone,
+                        initialPlayer: value
+                    });
+
+                    this.isThereAWinner();
+                    if (this.state.gameIsEnded === true) return;
+
                 }
-
-                let gameStateClone = this.state.gameState.slice();
-                let value = parseInt(e.choice);
-
-                gameStateClone[e.row][e.col] = value;
-
-                value = value * -1;
-
-                this.setState({
-                    gameState: gameStateClone,
-                    initialPlayer: value
-                });
-
-                this.isThereAWinner();
-                if (this.state.gameIsEnded === true) return;
             }
+        });
+
+        this.disconnectedSubscription = DeviceEventEmitter.addListener('onDisconnected', (e) => {
+            if (e.event === 'Disconnected')
+                Actions.popTo('versus');
         });
     }
 
     componentWillUnmount() {
         this.subscription.remove();
+        this.disconnectedSubscription.remove();
     }
 
     initializeGame() {
@@ -144,7 +177,7 @@ export default class Game extends Component {
             this.setState({
                 gameIsEnded: true
             });
-            Alert.alert(this.props.player1 + ' venceu!');
+            Alert.alert(this.state.player1 + ' venceu!');
         }
         else if (winner === -1) {
             this.setState({
@@ -152,7 +185,7 @@ export default class Game extends Component {
             });
 
             if (this.props.gameMode === 'versus')
-                Alert.alert(this.props.player2 + ' venceu!');
+                Alert.alert(this.state.player2 + ' venceu!');
             else
                 Alert.alert("A Máquina venceu!");
         } else if (winner === 2) {
@@ -172,8 +205,8 @@ export default class Game extends Component {
 
         let value = this.state.initialPlayer;
 
-        if(this.props.advertising && !this.props.discovering && value !== 1) return; // if is the advertising (player 1 - X), and it is not his turn, return
-        if(!this.props.advertising && this.props.discovering && value !== -1) return;
+        if (this.props.advertising && !this.props.discovering && value !== 1) return; // if is the advertising (player 1 - X), and it is not his turn, return
+        if (!this.props.advertising && this.props.discovering && value !== -1) return;
 
         let valueToPayload = value.toString();
 
@@ -190,7 +223,7 @@ export default class Game extends Component {
         this.isThereAWinner();
 
         /** Send choices to the other device */
-        let choice = row.toString() + ":" + col.toString() + ":" + valueToPayload + ":false";
+        let choice = row.toString() + ":" + col.toString() + ":" + valueToPayload + ":false:false:false:none"; //row,col,choice,restart,advertising,discovering,playersName
         NearbyConnections.sendByteMessage(choice);
 
         if (this.state.gameIsEnded === true) return;
@@ -347,13 +380,26 @@ export default class Game extends Component {
         });
     }
 
+    
     onRestartPress = () => {
         this.initializeGame();
-        NearbyConnections.sendByteMessage("0:0:0:true"); // code to restart the game (row, col, choice, restart)
+        let pattern = this.state.patternValue;
+        pattern = pattern * -1;
+        this.setState({ initialPlayer: pattern, patternValue: pattern}, () => {
+            if(pattern == -1 && this.props.gameMode === 'AI'){
+                this.letAIPlay();
+            }
+        });        
+
+        if(this.props.gameMode === 'versus')
+            NearbyConnections.sendByteMessage("0:0:0:true:false:false:none"); // code to restart the game (row,col,choice,restart,advertising,discovering,playersName)
     }
 
     restartGamePayload = () => {
         this.initializeGame();
+        let pattern = this.state.patternValue;
+        pattern = pattern * -1;
+        this.setState({ initialPlayer: pattern, patternValue: pattern});
     }
 
     render() {
@@ -376,7 +422,7 @@ export default class Game extends Component {
                                 />
                             }
                             inputStyle={this.state.isDarkMode ? stylesDarkMode.textInputs : stylesLightMode.textInputs}
-                            value={this.props.player1}
+                            value={this.props.gameMode === 'AI' ? this.props.player1 : this.state.player1}
                             editable={false}
                         />
 
@@ -391,7 +437,7 @@ export default class Game extends Component {
                                 />
                             }
                             inputStyle={this.state.isDarkMode ? stylesDarkMode.textInputs : stylesLightMode.textInputs}
-                            value={this.props.gameMode === 'versus' ? this.props.player2 : 'Máquina'}
+                            value={this.props.gameMode === 'versus' ? this.state.player2 : 'Máquina'}
                             editable={false}
                         />
                     </View>

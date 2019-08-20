@@ -32,14 +32,9 @@ export default class Home extends Component {
     }
 
     onGameModeSelector = (value) => {
-        if (value === 'AI') {
-            Actions.persons({
-                selector: value
-            });
-        }
-        else {
-            Actions.versus();
-        }
+        Actions.persons({
+            selector: value
+        });
     }
 
     onSwitchChange = () => {

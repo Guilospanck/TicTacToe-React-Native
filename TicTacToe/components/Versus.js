@@ -23,7 +23,6 @@ export default class Versus extends Component {
             isDarkMode: false,
             advertising: false,
             discovering: false
-
         }
         NearbyConnections.disconnect();
     }
@@ -39,18 +38,23 @@ export default class Versus extends Component {
 
         NearbyConnections.disconnect();
 
-        this.subscription = DeviceEventEmitter.addListener('onEndpointFound', function (e) {
+        /** This will listen only on the discovering device */
+        this.subscription = DeviceEventEmitter.addListener('onEndpointFound', (e) => {
             if (e.event === "EndpointFound")
-                Actions.devices();
+                Actions.devices({
+                    player2: this.props.player
+                });
         });
 
+        /** This will listen on both devices. But, as discovering is in another screen ('devicesList')
+         * we only apply the action.game() to the advertiser
+         */
         this.subscription = DeviceEventEmitter.addListener('onConnectionResult', (e) => {
             if (e.event === "Connected") {
                 if (this.state.advertising && !this.state.discovering) { // because the discovering will go to the Game screen from the device list
                     Actions.game({
                         gameMode: 'versus',
-                        player1: 'Player 1',
-                        player2: 'Player 2',
+                        player1: this.props.player,
                         advertising: true,
                         discovering: false
                     });
@@ -82,7 +86,7 @@ export default class Versus extends Component {
 
     startAdvertising = () => {
         NearbyConnections.disconnect();
-        NearbyConnections.startAdvertising("Player 1", (success) => {
+        NearbyConnections.startAdvertising(this.props.player, (success) => {
 
             if (success === "Success")
                 this.setState({ advertising: true, discovering: false });
