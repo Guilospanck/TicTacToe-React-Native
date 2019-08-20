@@ -67,6 +67,10 @@ export default class DevicesList extends Component {
         this.connectionWrongSubscription = DeviceEventEmitter.addListener('onConnectionSomethingWrong', (e) => {
             this.setState({deviceSelected: false});
         });
+
+        this.failureListenerDescription = DeviceEventEmitter.addListener('onFailureListener', (e) => {
+            this.setState({deviceSelected: false});
+        });
     }
 
     componentWillUnmount() {
@@ -75,6 +79,7 @@ export default class DevicesList extends Component {
         this.connectionRejectedSubscription.remove();
         this.connectionErrorSubscription.remove();
         this.connectionWrongSubscription.remove();
+        this.failureListenerDescription.remove();
     }
 
     onSwitchChange = () => {
@@ -120,7 +125,7 @@ export default class DevicesList extends Component {
                 <ArrowHeader onSwitchChange={() => this.onSwitchChange()} />
 
                 <View style={this.state.isDarkMode ? stylesDarkMode.container : stylesLightMode.container}>
-                    <Text style={[this.state.isDarkMode ? stylesDarkMode.Text : stylesLightMode.Text, { marginBottom: 10 }]}>A list of devices that are advertising...</Text>
+                    <Text style={[this.state.isDarkMode ? stylesDarkMode.Text : stylesLightMode.Text, { marginBottom: 10, fontSize: 20 }]}>A list of devices that are advertising...</Text>
                     <FlatList
                         data={this.state.endpointList}
                         renderItem={({ item, index }) => (
@@ -148,11 +153,11 @@ export default class DevicesList extends Component {
                         keyExtractor={(item, index) => index.toString()}
                         refreshing={this.state.refreshing}
                         onRefresh={() => this.handleRefresh()}
-                        ListEmptyComponent={<View><Text>No nearby devices...</Text></View>}
+                        ListEmptyComponent={<View style={{ alignItems: "center", marginTop: 200 }}><Text style={[this.state.isDarkMode ? stylesDarkMode.Text : stylesLightMode.Text, { fontSize: 20 }]}>No nearby devices...</Text></View>}
                     />
                     <Fragment>
                         {this.state.deviceSelected ? (
-                            <View><Text>Connecting...</Text></View>
+                            <View style={{ alignItems: "center", marginBottom: 10 }}><Text style={[this.state.isDarkMode ? stylesDarkMode.Text : stylesLightMode.Text, { fontSize: 20 }]}>Connecting...</Text></View>
                         ) : (
                             <Fragment></Fragment>
                         )}
@@ -168,7 +173,6 @@ const stylesLightMode = StyleSheet.create({
         flex: 1
     },
     Text: {
-        fontSize: 14,
         color: GLOBALS.LIGHT_MODE.textColor
     }
 });
@@ -179,7 +183,6 @@ const stylesDarkMode = StyleSheet.create({
         backgroundColor: GLOBALS.DARK_MODE.primaryLight
     },
     Text: {
-        fontSize: 14,
         color: GLOBALS.DARK_MODE.textColor
     }
 })

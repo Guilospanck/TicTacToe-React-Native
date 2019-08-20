@@ -156,6 +156,12 @@ public class NearbyConnectionsModule extends ReactContextBaseJavaModule {
                         (Exception e) -> {
                             // Nearby connections failed to request the connection.
                             Toast.makeText(context, "Nearby connections failed to request the connection. " + e, Toast.LENGTH_LONG).show();
+
+                            // send an event to the react native app
+                            WritableMap params2 = Arguments.createMap();
+                            params2.putString("event", "FailureListener");
+                            getReactApplicationContext().getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+                                    .emit("onFailureListener", params2);
                         });
     }
 
@@ -218,8 +224,6 @@ public class NearbyConnectionsModule extends ReactContextBaseJavaModule {
 
             getReactApplicationContext().getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
                     .emit("onEndpointFoundPopulateList", map);
-
-            clearEndpointList();
         }
 
         @Override
