@@ -32,7 +32,7 @@ export default class Home extends Component {
     }
 
     onGameModeSelector = (value) => {
-        Actions.persons({
+        Actions.reset('persons', {
             selector: value
         });
     }

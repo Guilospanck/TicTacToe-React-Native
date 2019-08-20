@@ -91,10 +91,15 @@ export default class Game extends Component {
                 }
             }
         });
-
+    
+        /** Disconnected event */
         this.disconnectedSubscription = DeviceEventEmitter.addListener('onDisconnected', (e) => {
             if (e.event === 'Disconnected')
-                Actions.popTo('versus');
+                Actions.reset('versus', {
+                    fromGameDisconnected: true,
+                    advertising: this.props.advertising,
+                    discovering: this.props.discovering
+                });
         });
     }
 
@@ -177,7 +182,7 @@ export default class Game extends Component {
             this.setState({
                 gameIsEnded: true
             });
-            Alert.alert(this.state.player1 + ' venceu!');
+            Alert.alert(this.props.gameMode === 'AI' ? (this.props.player1 + ' venceu!') : (this.state.player1 + ' venceu!'));
         }
         else if (winner === -1) {
             this.setState({

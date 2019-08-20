@@ -38,12 +38,27 @@ export default class Versus extends Component {
 
         NearbyConnections.disconnect();
 
+        /** If there is a disconnection in the game, the device returns to advertising or discovering mode */
+        if (this.props.fromGameDisconnected) {
+            if (this.props.advertising) this.startAdvertising();
+            if (this.props.discovering) this.startDiscovery();
+        }
+
         /** This will listen only on the discovering device */
         this.subscription = DeviceEventEmitter.addListener('onEndpointFound', (e) => {
-            if (e.event === "EndpointFound")
-                Actions.devices({
-                    player2: this.props.player
+            if (!this.props.player) {
+                GLOBALS.getStoreData('player').then((value) => {
+                    if (e.event === "EndpointFound")
+                        Actions.reset('devices', {
+                            player2: value
+                        });
                 });
+            } else {
+                if (e.event === "EndpointFound")
+                    Actions.reset('devices', {
+                        player2: this.props.player
+                    });
+            }
         });
 
         /** This will listen on both devices. But, as discovering is in another screen ('devicesList')
@@ -52,12 +67,23 @@ export default class Versus extends Component {
         this.subscription = DeviceEventEmitter.addListener('onConnectionResult', (e) => {
             if (e.event === "Connected") {
                 if (this.state.advertising && !this.state.discovering) { // because the discovering will go to the Game screen from the device list
-                    Actions.game({
-                        gameMode: 'versus',
-                        player1: this.props.player,
-                        advertising: true,
-                        discovering: false
-                    });
+                    if (!this.props.player) {
+                        GLOBALS.getStoreData('player').then((value) => {
+                            Actions.reset('game', {
+                                gameMode: 'versus',
+                                player1: value,
+                                advertising: true,
+                                discovering: false
+                            });
+                        });
+                    } else {
+                        Actions.reset('game', {
+                            gameMode: 'versus',
+                            player1: this.props.player,
+                            advertising: true,
+                            discovering: false
+                        });
+                    }
                 }
             }
         });
@@ -86,11 +112,20 @@ export default class Versus extends Component {
 
     startAdvertising = () => {
         NearbyConnections.disconnect();
-        NearbyConnections.startAdvertising(this.props.player, (success) => {
 
-            if (success === "Success")
-                this.setState({ advertising: true, discovering: false });
-        });
+        if (!this.props.player) {
+            GLOBALS.getStoreData('player').then((value) => {
+                NearbyConnections.startAdvertising(value, (success) => {
+                    if (success === "Success")
+                        this.setState({ advertising: true, discovering: false });
+                });
+            });
+        } else {
+            NearbyConnections.startAdvertising(this.props.player, (success) => {
+                if (success === "Success")
+                    this.setState({ advertising: true, discovering: false });
+            });
+        }
     }
 
     render() {

@@ -36,15 +36,17 @@ export default class Persons extends Component {
 
     onPlayPress = (value) => {
         if(value === 'PVP'){
-            Actions.versus({
+            Actions.reset('versus', {
                 player: this.state.player1 !== '' ? this.state.player1 : "Sem nome",
             });
         } else {
-            Actions.game({
+            Actions.reset('game', {
                 player1: this.state.player1 !== '' ? this.state.player1 : "Você",
                 gameMode: 'AI'
             });
         }
+
+        GLOBALS.storeData('player', this.state.player1 !== '' ? this.state.player1 : "Sem nome")
         
     }
 

@@ -148,6 +148,10 @@ public class NearbyConnectionsModule extends ReactContextBaseJavaModule {
         }
     }
 
+    private void clearEndpointList() {
+        endpointsAndDeviceNames.clear();
+    }
+
     @ReactMethod
     public void requestConnection(String endpointId){
         connectionsClients
@@ -269,6 +273,7 @@ public class NearbyConnectionsModule extends ReactContextBaseJavaModule {
             // We've been disconnected from this endpoint. No more data can be
             // sent or received.
             Toast.makeText(context, "Disconnected!", Toast.LENGTH_LONG).show();
+            clearEndpointList();
 
             // send an event to the react native app
             WritableMap params = Arguments.createMap();

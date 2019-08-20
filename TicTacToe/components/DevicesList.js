@@ -56,7 +56,7 @@ export default class DevicesList extends Component {
 
         this.subscription = DeviceEventEmitter.addListener('onConnectionResult', (e) => {
             if (e.event === "Connected")
-                Actions.game({
+                Actions.reset('game', {
                     gameMode: 'versus',
                     player2: this.props.player2,
                     discovering: true,
