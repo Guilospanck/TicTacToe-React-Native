@@ -9,6 +9,7 @@ import {
 import { Actions } from "react-native-router-flux";
 
 import GLOBALS from './Globals'
+import TRANSLATIONS from './Translations';
 import Header from "./Header";
 import NearbyConnections from './NearbyConnections';
 
@@ -54,12 +55,12 @@ export default class Home extends Component {
                     <TouchableOpacity
                         style={this.state.isDarkMode ? stylesDarkMode.versusAi : stylesLightMode.versusAi}
                         onPress={() => this.onGameModeSelector('AI')}>
-                        <Text style={this.state.isDarkMode ? stylesDarkMode.Text : stylesLightMode.Text}>AI</Text>
+                        <Text style={this.state.isDarkMode ? stylesDarkMode.Text : stylesLightMode.Text}>{TRANSLATIONS.AI}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                         style={this.state.isDarkMode ? stylesDarkMode.versusPerson : stylesLightMode.versusPerson}
                         onPress={() => this.onGameModeSelector('Versus')}>
-                        <Text style={this.state.isDarkMode ? stylesDarkMode.Text : stylesLightMode.Text}>Person</Text>
+                        <Text style={this.state.isDarkMode ? stylesDarkMode.Text : stylesLightMode.Text}>1 VS 1</Text>
                     </TouchableOpacity>
                 </View>
 

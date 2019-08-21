@@ -11,7 +11,8 @@ import {
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { Input, Button } from 'react-native-elements';
 
-import GLOBALS from './Globals'
+import GLOBALS from './Globals';
+import TRANSLATIONS from './Translations';
 import ArrowHeader from "./ArrowHeader";
 import NearbyConnections from './NearbyConnections';
 import { Actions } from "react-native-router-flux";
@@ -202,7 +203,7 @@ export default class Game extends Component {
                 gameIsEnded: true,
                 player1Score: player1score
             });
-            Alert.alert(this.props.gameMode === 'AI' ? (this.props.player1 + ' venceu!') : (this.state.player1 + ' venceu!'));
+            Alert.alert(this.props.gameMode === 'AI' ? (this.props.player1 + ' ' + TRANSLATIONS.won) : (this.state.player1 + ' ' + TRANSLATIONS.won));
         }
         else if (winner === -1) {
             let player2score = this.state.player2Score + 1;
@@ -212,14 +213,14 @@ export default class Game extends Component {
             });
 
             if (this.props.gameMode === 'versus')
-                Alert.alert(this.state.player2 + ' venceu!');
+                Alert.alert(this.state.player2 + ' ' + TRANSLATIONS.won);
             else
-                Alert.alert("A Máquina venceu!");
+                Alert.alert(TRANSLATIONS.AI_won_the_game);
         } else if (winner === 2) {
             this.setState({
                 gameIsEnded: true
             });
-            Alert.alert('Empate!');
+            Alert.alert(TRANSLATIONS.Draw);
         }
         return winner;
     }
@@ -501,7 +502,7 @@ export default class Game extends Component {
                                 />
                             }
                             inputStyle={this.state.isDarkMode ? stylesDarkMode.textInputs : stylesLightMode.textInputs}
-                            value={this.props.gameMode === 'versus' ? this.state.player2 : 'Máquina'}
+                            value={this.props.gameMode === 'versus' ? this.state.player2 : TRANSLATIONS.AI}
                             editable={false}
                         />
                     </View>
@@ -527,7 +528,7 @@ export default class Game extends Component {
                             }
                             rightIconContainerStyle={{ marginRight: 10 }}
                             inputStyle={this.state.isDarkMode ? stylesDarkMode.textInputs : stylesLightMode.textInputs}
-                            value="  Rodada: "
+                            value={" " + TRANSLATIONS.Round}
                             editable={false}
                         />
                     </View>
@@ -607,7 +608,7 @@ export default class Game extends Component {
                         <View style={{ marginTop: 20, justifyContent: "center", alignItems: "center" }}>
                             <Button
                                 type="outline"
-                                title="RESTART GAME"
+                                title={TRANSLATIONS.RESTART_GAME}
                                 containerStyle={{ paddingTop: 0 }}
                                 buttonStyle={{ width: 200 }}
                                 onPress={() => this.onRestartPress()}

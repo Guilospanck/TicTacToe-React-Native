@@ -12,6 +12,7 @@ import {
 import { Actions } from "react-native-router-flux";
 
 import GLOBALS from './Globals'
+import TRANSLATIONS from "./Translations";
 import ArrowHeader from "./ArrowHeader";
 import NearbyConnections from './NearbyConnections';
 
@@ -139,13 +140,13 @@ export default class Versus extends Component {
                         <TouchableOpacity
                             style={this.state.isDarkMode ? stylesDarkMode.versusPerson : stylesLightMode.versusPerson}
                         >
-                            <Text style={this.state.isDarkMode ? stylesDarkMode.Text : stylesLightMode.Text}>Descobrindo...</Text>
+                            <Text style={this.state.isDarkMode ? stylesDarkMode.Text : stylesLightMode.Text}>{TRANSLATIONS.Discovering}</Text>
                         </TouchableOpacity>
                     ) : (
                             <TouchableOpacity
                                 style={this.state.isDarkMode ? stylesDarkMode.versusPerson : stylesLightMode.versusPerson}
                                 onPress={() => this.startDiscovery()}>
-                                <Text style={this.state.isDarkMode ? stylesDarkMode.Text : stylesLightMode.Text}>Encontrar jogos ativos</Text>
+                                <Text style={this.state.isDarkMode ? stylesDarkMode.Text : stylesLightMode.Text}>{TRANSLATIONS.Find_active_games}</Text>
                             </TouchableOpacity>
                         )}
 
@@ -153,13 +154,13 @@ export default class Versus extends Component {
                         <TouchableOpacity
                             style={[this.state.isDarkMode ? stylesDarkMode.versusPerson : stylesLightMode.versusPerson, { marginTop: 10 }]}
                         >
-                            <Text style={this.state.isDarkMode ? stylesDarkMode.Text : stylesLightMode.Text}>Esperando...</Text>
+                            <Text style={this.state.isDarkMode ? stylesDarkMode.Text : stylesLightMode.Text}>{TRANSLATIONS.Waiting_for_players}</Text>
                         </TouchableOpacity>
                     ) : (
                             <TouchableOpacity
                                 style={[this.state.isDarkMode ? stylesDarkMode.versusPerson : stylesLightMode.versusPerson, { marginTop: 10 }]}
                                 onPress={() => this.startAdvertising()}>
-                                <Text style={this.state.isDarkMode ? stylesDarkMode.Text : stylesLightMode.Text}>Esperar jogadores</Text>
+                                <Text style={this.state.isDarkMode ? stylesDarkMode.Text : stylesLightMode.Text}>{TRANSLATIONS.Wait_for_players}</Text>
                             </TouchableOpacity>
                         )}
 

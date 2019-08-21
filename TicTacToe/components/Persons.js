@@ -11,6 +11,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import { Input, Button } from 'react-native-elements';
 
 import GLOBALS from './Globals'
+import TRANSLATIONS from './Translations';
 import ArrowHeader from "./ArrowHeader";
 
 import { Actions } from "react-native-router-flux";
@@ -37,16 +38,16 @@ export default class Persons extends Component {
     onPlayPress = (value) => {
         if(value === 'PVP'){
             Actions.reset('versus', {
-                player: this.state.player1 !== '' ? this.state.player1 : "Sem nome",
+                player: this.state.player1 !== '' ? this.state.player1 : TRANSLATIONS.No_name,
             });
         } else {
             Actions.reset('game', {
-                player1: this.state.player1 !== '' ? this.state.player1 : "Você",
+                player1: this.state.player1 !== '' ? this.state.player1 : TRANSLATIONS.You,
                 gameMode: 'AI'
             });
         }
 
-        GLOBALS.storeData('player', this.state.player1 !== '' ? this.state.player1 : "Sem nome")
+        GLOBALS.storeData('player', this.state.player1 !== '' ? this.state.player1 : TRANSLATIONS.No_name)
         
     }
 
@@ -71,7 +72,7 @@ export default class Persons extends Component {
                             <Fragment>
                                 <Input
                                     inputContainerStyle={{ borderWidth: 1, borderRadius: 50 }}
-                                    placeholder=" Insira o nome do Jogador"
+                                    placeholder={" " + TRANSLATIONS.Insert_players_name}
                                     maxLength={11}
                                     leftIcon={
                                         <Icon
@@ -86,7 +87,7 @@ export default class Persons extends Component {
                                 />
                                 <Button
                                     type="outline"
-                                    title="PLAY"
+                                    title={TRANSLATIONS.PLAY}
                                     containerStyle={{ paddingTop: 10 }}
                                     buttonStyle={{ width: 200 }}
                                     onPress={() => this.onPlayPress('PVP')}
@@ -98,7 +99,7 @@ export default class Persons extends Component {
                             <Fragment>
                                 <Input
                                     inputContainerStyle={{ borderWidth: 1, borderRadius: 50 }}
-                                    placeholder=" Insira o nome do Jogador 1"
+                                    placeholder={" " + TRANSLATIONS.Insert_players_name}
                                     maxLength={11}
                                     leftIcon={
                                         <Icon
@@ -114,7 +115,7 @@ export default class Persons extends Component {
 
                                 <Button
                                     type="outline"
-                                    title="PLAY"
+                                    title={TRANSLATIONS.PLAY}
                                     containerStyle={{ paddingTop: 10 }}
                                     buttonStyle={{ width: 200 }}
                                     onPress={() => this.onPlayPress('OnlyAI')}

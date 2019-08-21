@@ -14,6 +14,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import { Actions } from "react-native-router-flux";
 
 import GLOBALS from './Globals'
+import TRANSLATIONS from './Translations';
 import ArrowHeader from "./ArrowHeader";
 import NearbyConnections from './NearbyConnections';
 
@@ -119,7 +120,7 @@ export default class DevicesList extends Component {
                 <ArrowHeader onSwitchChange={() => this.onSwitchChange()} />
 
                 <View style={this.state.isDarkMode ? stylesDarkMode.container : stylesLightMode.container}>
-                    <Text style={[this.state.isDarkMode ? stylesDarkMode.Text : stylesLightMode.Text, { marginBottom: 10, fontSize: 20 }]}>A list of devices that are advertising...</Text>
+                    <Text style={[this.state.isDarkMode ? stylesDarkMode.Text : stylesLightMode.Text, { marginBottom: 10, fontSize: 20 }]}>{TRANSLATIONS.List_of_devices}</Text>
                     <FlatList
                         data={this.state.endpointList}
                         renderItem={({ item, index }) => (
@@ -148,13 +149,13 @@ export default class DevicesList extends Component {
                         refreshing={this.state.refreshing}
                         onRefresh={() => this.handleRefresh()}
                         ListEmptyComponent={<View style={{ alignItems: "center", marginTop: 200 }}>
-                            <Text style={[this.state.isDarkMode ? stylesDarkMode.Text : stylesLightMode.Text, { fontSize: 20 }]}>No nearby devices...</Text>
-                            <Text style={[this.state.isDarkMode ? stylesDarkMode.Text : stylesLightMode.Text, { fontSize: 14 }]}>Swipe down to update</Text>
+                            <Text style={[this.state.isDarkMode ? stylesDarkMode.Text : stylesLightMode.Text, { fontSize: 20 }]}>{TRANSLATIONS.No_nearby_devices}</Text>
+                            <Text style={[this.state.isDarkMode ? stylesDarkMode.Text : stylesLightMode.Text, { fontSize: 14 }]}>{TRANSLATIONS.Swipe_down_to_update}</Text>
                             </View>}
                     />
                     <Fragment>
                         {this.state.deviceSelected ? (
-                            <View style={{ alignItems: "center", marginBottom: 10 }}><Text style={[this.state.isDarkMode ? stylesDarkMode.Text : stylesLightMode.Text, { fontSize: 20 }]}>Connecting...</Text></View>
+                            <View style={{ alignItems: "center", marginBottom: 10 }}><Text style={[this.state.isDarkMode ? stylesDarkMode.Text : stylesLightMode.Text, { fontSize: 20 }]}>{TRANSLATIONS.Connecting}</Text></View>
                         ) : (
                                 <Fragment></Fragment>
                             )}

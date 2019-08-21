@@ -14,6 +14,7 @@ import {
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 import GLOBALS from './Globals'
+import TRANSLATIONS from './Translations';
 
 
 export default class ArrowHeader extends Component {
@@ -60,7 +61,7 @@ export default class ArrowHeader extends Component {
 
                 </View>
                 <Text style={styles.title}>
-                    Tic Tac Toe
+                    {TRANSLATIONS.TIC_TAC_TOE}
                 </Text>
                 <View style={styles.toggle}>
                     <View>
