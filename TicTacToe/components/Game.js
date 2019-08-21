@@ -4,7 +4,8 @@ import {
     View,
     TouchableOpacity,
     Alert,
-    DeviceEventEmitter
+    DeviceEventEmitter,
+    Text
 } from 'react-native'
 
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -26,6 +27,8 @@ export default class Game extends Component {
             patternValue: 1,
             player1: 'Carregando...',
             player2: 'Carregando...',
+            player1Score: 0,
+            player2Score: 0,
             gameState: [
                 [0, 0, 0],
                 [0, 0, 0],
@@ -147,6 +150,21 @@ export default class Game extends Component {
         return false;
     }
 
+    verifyEmptyMatrix = () => {
+        let gameState = this.state.gameState;
+        let count = 0;
+        for (let i = 0; i < 3; i++) {
+            for (let j = 0; j < 3; j++) {
+                if(gameState[i][j] === 0)   
+                    count++;             
+            }         
+        }
+
+        if(count === 9)
+            return true;
+        return false;
+    }
+
     verifyWinner = () => {
         let rowsSum = 0;
         let colsSum = 0;
@@ -179,14 +197,18 @@ export default class Game extends Component {
     isThereAWinner = () => {
         let winner = this.verifyWinner();
         if (winner === 1) {
+            let player1score = this.state.player1Score + 1;
             this.setState({
-                gameIsEnded: true
+                gameIsEnded: true,
+                player1Score: player1score
             });
             Alert.alert(this.props.gameMode === 'AI' ? (this.props.player1 + ' venceu!') : (this.state.player1 + ' venceu!'));
         }
         else if (winner === -1) {
+            let player2score = this.state.player2Score + 1;
             this.setState({
-                gameIsEnded: true
+                gameIsEnded: true,
+                player2Score: player2score
             });
 
             if (this.props.gameMode === 'versus')
@@ -362,7 +384,7 @@ export default class Game extends Component {
         [gameState, result, rowOrCol] = this.aiMustWin();
 
         if (result === 'none') {
-            return this.playerMustWin();           
+            return this.playerMustWin();
         } else {
             return [gameState, result, rowOrCol];
         }
@@ -422,10 +444,12 @@ export default class Game extends Component {
 
 
     onRestartPress = () => {
+        if(this.verifyEmptyMatrix()) return;
+
         this.initializeGame();
-        let pattern = this.state.patternValue;
+        let pattern = this.state.patternValue;        
         pattern = pattern * -1;
-        this.setState({ initialPlayer: pattern, patternValue: pattern }, () => {
+        this.setState({ initialPlayer: pattern, patternValue: pattern}, () => {
             if (pattern == -1 && this.props.gameMode === 'AI') {
                 this.letAIPlay();
             }
@@ -437,9 +461,9 @@ export default class Game extends Component {
 
     restartGamePayload = () => {
         this.initializeGame();
-        let pattern = this.state.patternValue;
+        let pattern = this.state.patternValue;        
         pattern = pattern * -1;
-        this.setState({ initialPlayer: pattern, patternValue: pattern });
+        this.setState({ initialPlayer: pattern, patternValue: pattern});
     }
 
     render() {
@@ -450,7 +474,7 @@ export default class Game extends Component {
 
                 <View style={this.state.isDarkMode ? stylesDarkMode.container : stylesLightMode.container}>
 
-                    <View style={{ flex: 2, flexDirection: 'row', marginTop: 10, justifyContent: 'flex-start' }}>
+                    <View style={{ flex: 1, flexDirection: 'row', marginTop: 10, justifyContent: 'flex-start', marginBottom: 20 }}>
                         <Input
                             containerStyle={{ flex: 1, justifyContent: 'flex-start' }}
                             inputContainerStyle={{ borderWidth: 1, borderRadius: 50, width: 150 }}
@@ -481,9 +505,9 @@ export default class Game extends Component {
                             editable={false}
                         />
                     </View>
-                    <View style={{ flex: 1, flexDirection: 'row', marginBottom: 70 }}>
+                    <View style={{ flex: 1, flexDirection: 'row', marginBottom: 20 }}>
                         <Input
-                            containerStyle={{ flex: 1, alignItems: 'flex-end' }}
+                            containerStyle={{ flex: 1, alignItems: 'center' }}
                             inputContainerStyle={{ borderWidth: 1, borderRadius: 50, width: 150 }}
                             rightIcon={
                                 this.state.initialPlayer === 1 ?
@@ -504,6 +528,39 @@ export default class Game extends Component {
                             rightIconContainerStyle={{ marginRight: 10 }}
                             inputStyle={this.state.isDarkMode ? stylesDarkMode.textInputs : stylesLightMode.textInputs}
                             value="  Rodada: "
+                            editable={false}
+                        />
+                    </View>
+                    <View style={{ flex: 1, flexDirection: 'row', marginBottom: 20 }}>
+                        <Input
+                            containerStyle={{ flex: 1, alignItems: "center" }}
+                            inputContainerStyle={{ borderWidth: 1, borderRadius: 50, width: 70, borderColor: 'red' }}
+                            leftIcon={
+                                <Icon
+                                    name='times'
+                                    size={24}
+                                    color='red'
+                                />
+                            }
+                            leftIconContainerStyle={{ marginLeft: 10, marginRight: 10 }}
+                            inputStyle={[this.state.isDarkMode ? stylesDarkMode.textInputs : stylesLightMode.textInputs, { color: 'red' }]}
+                            value={this.state.player1Score.toString()}
+                            editable={false}
+                        />
+                        <Text style={[this.state.isDarkMode ? stylesDarkMode.textInputs : stylesLightMode.textInputs, { fontSize: 30 }]}> x </Text>
+                        <Input
+                            containerStyle={{ flex: 1, alignItems: "center" }}
+                            inputContainerStyle={{ borderWidth: 1, borderRadius: 50, width: 70, borderColor: 'green', paddingLeft: 5 }}
+                            rightIcon={
+                                <Icon
+                                    name='circle'
+                                    size={24}
+                                    color='green'
+                                />
+                            }
+                            rightIconContainerStyle={{ marginRight: 10 }}
+                            inputStyle={[this.state.isDarkMode ? stylesDarkMode.textInputs : stylesLightMode.textInputs, { color: 'green' }]}
+                            value={this.state.player2Score.toString()}
                             editable={false}
                         />
                     </View>
