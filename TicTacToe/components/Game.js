@@ -35,6 +35,7 @@ export default class Game extends Component {
             dialogContent: "",
             dialogIcon: 0,
             dialogTitle: "",
+            disconnectedDialogVisible: false,
             gameState: [
                 [0, 0, 0],
                 [0, 0, 0],
@@ -103,6 +104,9 @@ export default class Game extends Component {
 
         /** Disconnected event */
         this.disconnectedSubscription = DeviceEventEmitter.addListener('onDisconnected', (e) => {
+            this.setState({ disconnectedDialogVisible: true }, () => {
+
+            });
             if (e.event === 'Disconnected')
                 Actions.reset('versus', {
                     fromGameDisconnected: true,
@@ -483,6 +487,27 @@ export default class Game extends Component {
             <Fragment>
                 <ArrowHeader onSwitchChange={() => this.onSwitchChange()} />
 
+                {/* Disconnected dialog */}
+                <Dialog
+                    visible={this.state.disconnectedDialogVisible}
+                    title={TRANSLATIONS.Disconnected}
+                    onTouchOutside={() => this.setState({ disconnectedDialogVisible: false })} >
+                    <View>
+                        <View style={{ justifyContent: "center" }}>
+                            <Text>{TRANSLATIONS.Connection_off}</Text>
+                        </View>
+                        <View style={{ marginTop: 7, alignItems: "center" }}>
+                            <Button
+                                type="outline"
+                                title="OK"
+                                containerStyle={{ paddingTop: 0 }}
+                                buttonStyle={{ width: 100 }}
+                                onPress={() => this.setState({ disconnectedDialogVisible: false })}
+                            />
+                        </View>
+                    </View>
+                </Dialog>
+
                 <Dialog
                     visible={this.state.dialogVisible}
                     title={this.state.dialogTitle}
@@ -508,7 +533,7 @@ export default class Game extends Component {
                                 <Text>{this.state.dialogContent}</Text>
                             </View>
                         </View>
-                        <View style={{ marginTop: 7, alignItems: "center"}}>
+                        <View style={{ marginTop: 7, alignItems: "center" }}>
                             <Button
                                 type="outline"
                                 title="OK"

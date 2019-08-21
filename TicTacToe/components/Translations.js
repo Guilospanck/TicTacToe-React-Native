@@ -26,7 +26,11 @@ const TRANSLATIONS = new LocalizedStrings(
         "RESTART_GAME": "RESTART GAME",
         "TIC_TAC_TOE": "Tic Tac Toe",
         "Please_wait": "Please, wait...",
-        "Victory": "Victory!"
+        "Victory": "Victory!",
+        "Connection_Error": "Connection Error!",
+        "Try_again": "Try again.",
+        "Disconnected": "Disconnected!",
+        "Connection_off": "The connection with the other player has ended."
     },
     pt: {
         "AI": "IA",
@@ -49,7 +53,11 @@ const TRANSLATIONS = new LocalizedStrings(
         "RESTART_GAME": "REINICIAR JOGO",
         "TIC_TAC_TOE": "Jogo da Velha",
         "Please_wait": "Por favor, espere...",
-        "Victory": "Vitória!"
+        "Victory": "Vitória!",
+        "Connection_Error": "Erro de conexão!",
+        "Try_again": "Tente novamente.",
+        "Disconnected": "Desconectado!",
+        "Connection_off": "A conexão com o outro jogador foi encerrada."
     },
     fr: {
         "AI": "IA",
@@ -72,7 +80,11 @@ const TRANSLATIONS = new LocalizedStrings(
         "RESTART_GAME": "RECOMMENCER LE JEUX",
         "TIC_TAC_TOE": "Morpion",
         "Please_wait": "S'il vous plaît, attendez...",
-        "Victory": "La victoire!"
+        "Victory": "La victoire!",
+        "Connection_Error": "Erreur de connexion!",
+        "Try_again": "Réessayer.",
+        "Disconnected": "Débranché!",
+        "Connection_off": "La connexion avec l'autre joueur est terminée."
     }
 },
 {

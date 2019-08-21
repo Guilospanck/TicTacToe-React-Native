@@ -2,37 +2,20 @@ package com.tictactoe;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-import android.Manifest;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
-import android.os.Bundle;
-import android.telecom.Call;
 import android.widget.Toast;
 
-import androidx.annotation.CallSuper;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.appcompat.app.AppCompatActivity;
 
 import com.facebook.react.bridge.Arguments;
-import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
-import com.facebook.react.bridge.WritableNativeArray;
 import com.facebook.react.bridge.WritableNativeMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
-import com.facebook.react.uimanager.IllegalViewOperationException;
-import com.facebook.react.uimanager.PixelUtil;
 import com.google.android.gms.nearby.Nearby;
 import com.google.android.gms.nearby.connection.AdvertisingOptions;
 import com.google.android.gms.nearby.connection.ConnectionInfo;
 import com.google.android.gms.nearby.connection.ConnectionLifecycleCallback;
 import com.google.android.gms.nearby.connection.ConnectionResolution;
-import com.google.android.gms.nearby.connection.Connections;
 import com.google.android.gms.nearby.connection.ConnectionsClient;
 import com.google.android.gms.nearby.connection.ConnectionsStatusCodes;
 import com.google.android.gms.nearby.connection.DiscoveredEndpointInfo;
@@ -41,28 +24,15 @@ import com.google.android.gms.nearby.connection.EndpointDiscoveryCallback;
 import com.google.android.gms.nearby.connection.Payload;
 import com.google.android.gms.nearby.connection.PayloadCallback;
 import com.google.android.gms.nearby.connection.PayloadTransferUpdate;
-import com.google.android.gms.nearby.connection.PayloadTransferUpdate.Status;
 import com.google.android.gms.nearby.connection.Strategy;
 
-import com.facebook.react.bridge.NativeModule;
 import com.facebook.react.bridge.ReactApplicationContext;
-import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
-import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.Callback;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.lang.reflect.Array;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class NearbyConnectionsModule extends ReactContextBaseJavaModule {
 
@@ -135,7 +105,7 @@ public class NearbyConnectionsModule extends ReactContextBaseJavaModule {
             successCallback.invoke(map);
 
         } catch (Exception e) {
-            Toast.makeText(context, "GetEndpointList: " + e, Toast.LENGTH_LONG).show();
+//            Toast.makeText(context, "GetEndpointList: " + e, Toast.LENGTH_LONG).show();
         }
     }
 
@@ -155,7 +125,7 @@ public class NearbyConnectionsModule extends ReactContextBaseJavaModule {
                 .addOnFailureListener(
                         (Exception e) -> {
                             // Nearby connections failed to request the connection.
-                            Toast.makeText(context, "Nearby connections failed to request the connection. " + e, Toast.LENGTH_LONG).show();
+//                            Toast.makeText(context, "Nearby connections failed to request the connection. " + e, Toast.LENGTH_LONG).show();
 
                             // send an event to the react native app
                             WritableMap params2 = Arguments.createMap();
@@ -204,7 +174,7 @@ public class NearbyConnectionsModule extends ReactContextBaseJavaModule {
         @Override
         public void onEndpointFound(@NonNull String endpointId, @NonNull DiscoveredEndpointInfo info) {
             // And endpoint was found. We request a connection to it.
-            Toast.makeText(context, "Endpoint found! " + endpointId, Toast.LENGTH_LONG).show();
+//            Toast.makeText(context, "Endpoint found! " + endpointId, Toast.LENGTH_LONG).show();
 
             // send an event to the react native app
             WritableMap params = Arguments.createMap();
@@ -258,7 +228,7 @@ public class NearbyConnectionsModule extends ReactContextBaseJavaModule {
             switch (result.getStatus().getStatusCode()){
                 case ConnectionsStatusCodes.STATUS_OK:
                     // We're connected! Can now start sending and receiving data.
-                    Toast.makeText(context, "We're connected! STATUS_OK", Toast.LENGTH_SHORT).show();
+//                    Toast.makeText(context, "We're connected! STATUS_OK", Toast.LENGTH_SHORT).show();
                     // We don't need to advertise and discovery anymore
                     connectionsClients.stopAdvertising();
                     connectionsClients.stopDiscovery();
@@ -273,7 +243,7 @@ public class NearbyConnectionsModule extends ReactContextBaseJavaModule {
                     break;
                 case ConnectionsStatusCodes.STATUS_CONNECTION_REJECTED:
                     // The connections was rejected by one or both sides.
-                    Toast.makeText(context, "Connection Rejected!", Toast.LENGTH_LONG).show();
+//                    Toast.makeText(context, "Connection Rejected!", Toast.LENGTH_LONG).show();
 
                     // send an event to the react native app
                     WritableMap params1 = Arguments.createMap();
@@ -282,7 +252,7 @@ public class NearbyConnectionsModule extends ReactContextBaseJavaModule {
                     break;
                 case ConnectionsStatusCodes.STATUS_ERROR:
                     // The connection broke before it was able to be accepted.
-                    Toast.makeText(context, "Connection Error!", Toast.LENGTH_LONG).show();
+//                    Toast.makeText(context, "Connection Error!", Toast.LENGTH_LONG).show();
 
                     // send an event to the react native app
                     WritableMap params2 = Arguments.createMap();
@@ -291,7 +261,7 @@ public class NearbyConnectionsModule extends ReactContextBaseJavaModule {
                     break;
                 default:
                      // Unknown status code
-                    Toast.makeText(context, "Something went wrong in the ConnectionResult.", Toast.LENGTH_LONG).show();
+//                    Toast.makeText(context, "Something went wrong in the ConnectionResult.", Toast.LENGTH_LONG).show();
                     // send an event to the react native app
                     WritableMap params3 = Arguments.createMap();
                     getReactApplicationContext().getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
@@ -303,7 +273,7 @@ public class NearbyConnectionsModule extends ReactContextBaseJavaModule {
         public void onDisconnected(@NonNull String endpointId) {
             // We've been disconnected from this endpoint. No more data can be
             // sent or received.
-            Toast.makeText(context, "Disconnected!", Toast.LENGTH_LONG).show();
+//            Toast.makeText(context, "Disconnected!", Toast.LENGTH_LONG).show();
             clearEndpointList();
 
             // send an event to the react native app
@@ -330,13 +300,19 @@ public class NearbyConnectionsModule extends ReactContextBaseJavaModule {
                 .addOnSuccessListener(
                         (Void unused) -> {
                             // We are advertising!
-                            Toast.makeText(context, "We are Advertising!", Toast.LENGTH_LONG).show();
+//                            Toast.makeText(context, "We are Advertising!", Toast.LENGTH_LONG).show();
                             successCallback.invoke("Success");
                         })
                 .addOnFailureListener(
                         (Exception e) -> {
                             // We are unable to advertising.
-                            Toast.makeText(context, "We are unable to Advertising!", Toast.LENGTH_LONG).show();
+//                            Toast.makeText(context, "We are unable to Advertising!", Toast.LENGTH_LONG).show();
+
+                            // send an event to the react native app
+                            WritableMap params = Arguments.createMap();
+                            params.putString("event", "failureAdvertising");
+                            getReactApplicationContext().getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+                                    .emit("onFailureOfAdvertisingOrDiscovering", params);
                         });
     }
 
@@ -355,13 +331,18 @@ public class NearbyConnectionsModule extends ReactContextBaseJavaModule {
                 .addOnSuccessListener(
                         (Void unused) -> {
                           // We are discovering!
-                            Toast.makeText(context, "We are Discovering!", Toast.LENGTH_LONG).show();
+//                            Toast.makeText(context, "We are Discovering!", Toast.LENGTH_LONG).show();
                             successCallback.invoke("success");
                         })
                 .addOnFailureListener(
                         (Exception e) -> {
                             // We're unable to discovering.
-                            Toast.makeText(context, "We are unable to Discovering!", Toast.LENGTH_LONG).show();
+//                            Toast.makeText(context, "We are unable to Discovering!", Toast.LENGTH_LONG).show();
+                            // send an event to the react native app
+                            WritableMap params = Arguments.createMap();
+                            params.putString("event", "failureDiscovering");
+                            getReactApplicationContext().getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+                                    .emit("onFailureOfAdvertisingOrDiscovering", params);
                         });
     }
 }

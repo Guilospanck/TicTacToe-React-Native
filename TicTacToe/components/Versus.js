@@ -23,7 +23,8 @@ export default class Versus extends Component {
         this.state = {
             isDarkMode: false,
             advertising: false,
-            discovering: false
+            discovering: false,
+            tryAgainDialogVisible: false
         }
         NearbyConnections.disconnect();
     }
@@ -65,7 +66,7 @@ export default class Versus extends Component {
         /** This will listen on both devices. But, as discovering is in another screen ('devicesList')
          * we only apply the action.game() to the advertiser
          */
-        this.subscription = DeviceEventEmitter.addListener('onConnectionResult', (e) => {
+        this.connectionSubscription = DeviceEventEmitter.addListener('onConnectionResult', (e) => {
             if (e.event === "Connected") {
                 if (this.state.advertising && !this.state.discovering) { // because the discovering will go to the Game screen from the device list
                     if (!this.props.player) {
@@ -88,10 +89,18 @@ export default class Versus extends Component {
                 }
             }
         });
+
+        /** Manages if there is some failure on the Advertising or Discovering listeners */
+        this.failureAdvertisingOrDiscoveringSubscription = DeviceEventEmitter.addListener('onFailureOfAdvertisingOrDiscovering', (e) => {
+            NearbyConnections.disconnect();
+            this.setState({ tryAgainDialogVisible: true, advertising: false, discovering: false });
+        });
     }
 
     componentWillUnmount() {
         this.subscription.remove();
+        this.connectionSubscription.remove();
+        this.failureAdvertisingOrDiscoveringSubscription.remove();
     }
 
     onSwitchChange = () => {
@@ -133,6 +142,27 @@ export default class Versus extends Component {
         return (
             <Fragment>
                 <ArrowHeader onSwitchChange={() => this.onSwitchChange()} />
+
+                {/* Try again dialog */}
+                <Dialog
+                    visible={this.state.tryAgainDialogVisible}
+                    title={TRANSLATIONS.Connection_Error}
+                    onTouchOutside={() => this.setState({ tryAgainDialogVisible: false })} >
+                    <View>
+                        <View style={{ justifyContent: "center" }}>
+                            <Text>{TRANSLATIONS.Try_again}</Text>
+                        </View>
+                        <View style={{ marginTop: 7, alignItems: "center" }}>
+                            <Button
+                                type="outline"
+                                title="OK"
+                                containerStyle={{ paddingTop: 0 }}
+                                buttonStyle={{ width: 100 }}
+                                onPress={() => this.setState({ tryAgainDialogVisible: false })}
+                            />
+                        </View>
+                    </View>
+                </Dialog>
 
                 <View style={this.state.isDarkMode ? stylesDarkMode.container : stylesLightMode.container}>
 

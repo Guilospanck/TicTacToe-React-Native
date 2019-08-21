@@ -30,7 +30,8 @@ export default class DevicesList extends Component {
             endpointList: [],
             infoEndpointName: [],
             refreshing: false,
-            deviceSelected: false
+            deviceSelected: false,
+            tryAgainDialogVisible: false
         }
     }
 
@@ -68,7 +69,7 @@ export default class DevicesList extends Component {
         });
 
         this.connectionErrorSubscription = DeviceEventEmitter.addListener('onConnectionError', (e) => {
-            this.setState({ deviceSelected: false });
+            this.setState({ deviceSelected: false, tryAgainDialogVisible: true });
         });
     }
 
@@ -120,6 +121,28 @@ export default class DevicesList extends Component {
         return (
             <Fragment>
                 <ArrowHeader onSwitchChange={() => this.onSwitchChange()} />
+
+                {/* Try again dialog */}
+                <Dialog
+                    visible={this.state.tryAgainDialogVisible}
+                    title={TRANSLATIONS.Connection_Error}
+                    onTouchOutside={() => this.setState({ tryAgainDialogVisible: false })} >
+                    <View>
+                        <View style={{ justifyContent: "center" }}>
+                            <Text>{TRANSLATIONS.Try_again}</Text>
+                        </View>
+                        <View style={{ marginTop: 7, alignItems: "center" }}>
+                            <Button
+                                type="outline"
+                                title="OK"
+                                containerStyle={{ paddingTop: 0 }}
+                                buttonStyle={{ width: 100 }}
+                                onPress={() => this.setState({ tryAgainDialogVisible: false })}
+                            />
+                        </View>
+                    </View>
+                </Dialog>
+
 
                 <View style={this.state.isDarkMode ? stylesDarkMode.container : stylesLightMode.container}>
                     <Text style={[this.state.isDarkMode ? stylesDarkMode.Text : stylesLightMode.Text, { marginBottom: 10, fontSize: 20 }]}>{TRANSLATIONS.List_of_devices}</Text>
