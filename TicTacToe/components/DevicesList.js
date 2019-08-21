@@ -11,6 +11,8 @@ import {
 import { ListItem } from "react-native-elements";
 import Icon from 'react-native-vector-icons/FontAwesome';
 
+import { Button } from 'react-native-elements';
+
 import { Actions } from "react-native-router-flux";
 
 import GLOBALS from './Globals'
@@ -18,7 +20,7 @@ import TRANSLATIONS from './Translations';
 import ArrowHeader from "./ArrowHeader";
 import NearbyConnections from './NearbyConnections';
 
-import { ProgressDialog } from 'react-native-simple-dialogs';
+import { Dialog, ProgressDialog } from 'react-native-simple-dialogs';
 
 export default class DevicesList extends Component {
     _isMounted = false;

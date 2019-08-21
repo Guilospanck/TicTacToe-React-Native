@@ -104,15 +104,16 @@ export default class Game extends Component {
 
         /** Disconnected event */
         this.disconnectedSubscription = DeviceEventEmitter.addListener('onDisconnected', (e) => {
-            this.setState({ disconnectedDialogVisible: true }, () => {
+            this.setState({ disconnectedDialogVisible: true }); 
+        });
+    }
 
-            });
-            if (e.event === 'Disconnected')
-                Actions.reset('versus', {
-                    fromGameDisconnected: true,
-                    advertising: this.props.advertising,
-                    discovering: this.props.discovering
-                });
+    goToVersusFromGame = () => {
+        this.setState({disconnectedDialogVisible: false});
+        Actions.reset('versus', {
+            fromGameDisconnected: true,
+            advertising: this.props.advertising,
+            discovering: this.props.discovering
         });
     }
 
@@ -491,7 +492,7 @@ export default class Game extends Component {
                 <Dialog
                     visible={this.state.disconnectedDialogVisible}
                     title={TRANSLATIONS.Disconnected}
-                    onTouchOutside={() => this.setState({ disconnectedDialogVisible: false })} >
+                    onTouchOutside={() => this.goToVersusFromGame()} >
                     <View>
                         <View style={{ justifyContent: "center" }}>
                             <Text>{TRANSLATIONS.Connection_off}</Text>
@@ -502,7 +503,7 @@ export default class Game extends Component {
                                 title="OK"
                                 containerStyle={{ paddingTop: 0 }}
                                 buttonStyle={{ width: 100 }}
-                                onPress={() => this.setState({ disconnectedDialogVisible: false })}
+                                onPress={() => this.goToVersusFromGame()}
                             />
                         </View>
                     </View>

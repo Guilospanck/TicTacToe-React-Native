@@ -16,6 +16,8 @@ import TRANSLATIONS from "./Translations";
 import ArrowHeader from "./ArrowHeader";
 import NearbyConnections from './NearbyConnections';
 
+import { Dialog } from 'react-native-simple-dialogs';
+import { Button } from 'react-native-elements';
 
 export default class Versus extends Component {
     constructor() {
