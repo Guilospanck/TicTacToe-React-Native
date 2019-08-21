@@ -10,6 +10,7 @@ import {
 
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { Input, Button } from 'react-native-elements';
+import { Dialog } from 'react-native-simple-dialogs';
 
 import GLOBALS from './Globals';
 import TRANSLATIONS from './Translations';
@@ -30,6 +31,10 @@ export default class Game extends Component {
             player2: 'Carregando...',
             player1Score: 0,
             player2Score: 0,
+            dialogVisible: false,
+            dialogContent: "",
+            dialogIcon: 0,
+            dialogTitle: "",
             gameState: [
                 [0, 0, 0],
                 [0, 0, 0],
@@ -156,12 +161,12 @@ export default class Game extends Component {
         let count = 0;
         for (let i = 0; i < 3; i++) {
             for (let j = 0; j < 3; j++) {
-                if(gameState[i][j] === 0)   
-                    count++;             
-            }         
+                if (gameState[i][j] === 0)
+                    count++;
+            }
         }
 
-        if(count === 9)
+        if (count === 9)
             return true;
         return false;
     }
@@ -201,26 +206,32 @@ export default class Game extends Component {
             let player1score = this.state.player1Score + 1;
             this.setState({
                 gameIsEnded: true,
-                player1Score: player1score
+                player1Score: player1score,
+                dialogIcon: 1,
+                dialogContent: this.props.gameMode === 'AI' ? (this.props.player1 + ' ' + TRANSLATIONS.won) : (this.state.player1 + ' ' + TRANSLATIONS.won),
+                dialogVisible: true,
+                dialogTitle: TRANSLATIONS.Victory
             });
-            Alert.alert(this.props.gameMode === 'AI' ? (this.props.player1 + ' ' + TRANSLATIONS.won) : (this.state.player1 + ' ' + TRANSLATIONS.won));
         }
         else if (winner === -1) {
             let player2score = this.state.player2Score + 1;
             this.setState({
                 gameIsEnded: true,
-                player2Score: player2score
+                player2Score: player2score,
+                dialogIcon: -1,
+                dialogContent: this.props.gameMode === 'AI' ? (TRANSLATIONS.AI_won_the_game) : (this.state.player2 + ' ' + TRANSLATIONS.won),
+                dialogVisible: true,
+                dialogTitle: TRANSLATIONS.Victory
             });
 
-            if (this.props.gameMode === 'versus')
-                Alert.alert(this.state.player2 + ' ' + TRANSLATIONS.won);
-            else
-                Alert.alert(TRANSLATIONS.AI_won_the_game);
         } else if (winner === 2) {
             this.setState({
-                gameIsEnded: true
+                gameIsEnded: true,
+                dialogIcon: 2,
+                dialogContent: "",
+                dialogVisible: true,
+                dialogTitle: TRANSLATIONS.Draw
             });
-            Alert.alert(TRANSLATIONS.Draw);
         }
         return winner;
     }
@@ -445,12 +456,12 @@ export default class Game extends Component {
 
 
     onRestartPress = () => {
-        if(this.verifyEmptyMatrix()) return;
+        if (this.verifyEmptyMatrix()) return;
 
         this.initializeGame();
-        let pattern = this.state.patternValue;        
+        let pattern = this.state.patternValue;
         pattern = pattern * -1;
-        this.setState({ initialPlayer: pattern, patternValue: pattern}, () => {
+        this.setState({ initialPlayer: pattern, patternValue: pattern }, () => {
             if (pattern == -1 && this.props.gameMode === 'AI') {
                 this.letAIPlay();
             }
@@ -462,9 +473,9 @@ export default class Game extends Component {
 
     restartGamePayload = () => {
         this.initializeGame();
-        let pattern = this.state.patternValue;        
+        let pattern = this.state.patternValue;
         pattern = pattern * -1;
-        this.setState({ initialPlayer: pattern, patternValue: pattern});
+        this.setState({ initialPlayer: pattern, patternValue: pattern });
     }
 
     render() {
@@ -472,6 +483,42 @@ export default class Game extends Component {
             <Fragment>
                 <ArrowHeader onSwitchChange={() => this.onSwitchChange()} />
 
+                <Dialog
+                    visible={this.state.dialogVisible}
+                    title={this.state.dialogTitle}
+                    onTouchOutside={() => this.setState({ dialogVisible: false, dialogContent: "", dialogIcon: 0, dialogTitle: "" })} >
+                    <View>
+                        <View style={{ flexDirection: 'row', justifyContent: "center" }}>
+                            {this.state.dialogIcon === 1 ? (
+                                <Icon
+                                    name='times'
+                                    size={24}
+                                    color='red'
+                                />
+                            ) : (this.state.dialogIcon === -1 ? (
+                                <Icon
+                                    name='circle'
+                                    size={24}
+                                    color='green'
+                                />
+                            ) : (
+                                    <Fragment></Fragment>
+                                ))}
+                            <View style={{ marginLeft: 5 }}>
+                                <Text>{this.state.dialogContent}</Text>
+                            </View>
+                        </View>
+                        <View style={{ marginTop: 7, alignItems: "center"}}>
+                            <Button
+                                type="outline"
+                                title="OK"
+                                containerStyle={{ paddingTop: 0 }}
+                                buttonStyle={{ width: 100 }}
+                                onPress={() => this.setState({ dialogVisible: false, dialogContent: "", dialogIcon: 0, dialogTitle: "" })}
+                            />
+                        </View>
+                    </View>
+                </Dialog>
 
                 <View style={this.state.isDarkMode ? stylesDarkMode.container : stylesLightMode.container}>
 

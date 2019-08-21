@@ -18,6 +18,8 @@ import TRANSLATIONS from './Translations';
 import ArrowHeader from "./ArrowHeader";
 import NearbyConnections from './NearbyConnections';
 
+import { ProgressDialog } from 'react-native-simple-dialogs';
+
 export default class DevicesList extends Component {
     _isMounted = false;
 
@@ -151,11 +153,16 @@ export default class DevicesList extends Component {
                         ListEmptyComponent={<View style={{ alignItems: "center", marginTop: 200 }}>
                             <Text style={[this.state.isDarkMode ? stylesDarkMode.Text : stylesLightMode.Text, { fontSize: 20 }]}>{TRANSLATIONS.No_nearby_devices}</Text>
                             <Text style={[this.state.isDarkMode ? stylesDarkMode.Text : stylesLightMode.Text, { fontSize: 14 }]}>{TRANSLATIONS.Swipe_down_to_update}</Text>
-                            </View>}
+                        </View>}
                     />
                     <Fragment>
                         {this.state.deviceSelected ? (
-                            <View style={{ alignItems: "center", marginBottom: 10 }}><Text style={[this.state.isDarkMode ? stylesDarkMode.Text : stylesLightMode.Text, { fontSize: 20 }]}>{TRANSLATIONS.Connecting}</Text></View>
+                            // <View style={{ alignItems: "center", marginBottom: 10 }}><Text style={[this.state.isDarkMode ? stylesDarkMode.Text : stylesLightMode.Text, { fontSize: 20 }]}>{TRANSLATIONS.Connecting}</Text></View>
+                            <ProgressDialog
+                                visible={this.state.deviceSelected}
+                                title={TRANSLATIONS.Connecting}
+                                message={TRANSLATIONS.Please_wait}
+                            />
                         ) : (
                                 <Fragment></Fragment>
                             )}

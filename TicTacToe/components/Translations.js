@@ -18,13 +18,15 @@ const TRANSLATIONS = new LocalizedStrings(
         "List_of_devices": "A list of devices that are advertising...",
         "No_nearby_devices": "No nearby devices...",
         "Swipe_down_to_update": "Swipe down to update",
-        "Connecting": "Connecting...",
+        "Connecting": "Connecting",
         "won": "won!",
         "AI_won_the_game": "The AI has won the game!",
         "Draw": "Draw!",
         "Round": "Round",
         "RESTART_GAME": "RESTART GAME",
-        "TIC_TAC_TOE": "Tic Tac Toe"
+        "TIC_TAC_TOE": "Tic Tac Toe",
+        "Please_wait": "Please, wait...",
+        "Victory": "Victory!"
     },
     pt: {
         "AI": "IA",
@@ -45,7 +47,9 @@ const TRANSLATIONS = new LocalizedStrings(
         "Draw": "Empate!",
         "Round": "Rodada",
         "RESTART_GAME": "REINICIAR JOGO",
-        "TIC_TAC_TOE": "Jogo da Velha"
+        "TIC_TAC_TOE": "Jogo da Velha",
+        "Please_wait": "Por favor, espere...",
+        "Victory": "Vitória!"
     },
     fr: {
         "AI": "IA",
@@ -66,7 +70,9 @@ const TRANSLATIONS = new LocalizedStrings(
         "Draw": "Dessiner!",
         "Round": "Rond",
         "RESTART_GAME": "RECOMMENCER LE JEUX",
-        "TIC_TAC_TOE": "Morpion"
+        "TIC_TAC_TOE": "Morpion",
+        "Please_wait": "S'il vous plaît, attendez...",
+        "Victory": "La victoire!"
     }
 },
 {
