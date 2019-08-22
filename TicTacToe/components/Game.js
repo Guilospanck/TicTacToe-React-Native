@@ -641,7 +641,7 @@ export default class Game extends Component {
 
                     {/* End of the Players' header and begin of the tiles */}
 
-                    <View style={{ flex: 9 }}>
+                    <View style={{ flex: 13, flexShrink: 3 }}>
                         <View style={{ flexDirection: 'row' }}>
                             <TouchableOpacity onPress={() => this.props.gameMode === 'versus' ? this.onPressTileVersus(0, 0) : this.onPressTileAI(0, 0)} style={[(this.state.isDarkMode ? stylesDarkMode.tile : stylesLightMode.tile), { borderLeftWidth: 0, borderTopWidth: 0 }]}>
                                 {this.renderIcon(0, 0)}
@@ -678,7 +678,7 @@ export default class Game extends Component {
                             </TouchableOpacity>
                         </View>
 
-                        <View style={{ marginTop: 20, justifyContent: "center", alignItems: "center" }}>
+                        <View style={{ marginTop: 20, justifyContent: "center", alignItems: "center", flexShrink: 4, flexGrow: 2}}>
                             <Button
                                 type="outline"
                                 title={TRANSLATIONS.RESTART_GAME}
