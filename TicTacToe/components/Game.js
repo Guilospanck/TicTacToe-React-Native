@@ -5,7 +5,8 @@ import {
     TouchableOpacity,
     Alert,
     DeviceEventEmitter,
-    Text
+    Text,
+    Dimensions
 } from 'react-native'
 
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -19,7 +20,7 @@ import NearbyConnections from './NearbyConnections';
 import { Actions } from "react-native-router-flux";
 
 export default class Game extends Component {
-
+    
     constructor() {
         super();
         this.state = {
@@ -36,6 +37,7 @@ export default class Game extends Component {
             dialogIcon: 0,
             dialogTitle: "",
             disconnectedDialogVisible: false,
+            screenHeight: Math.round(Dimensions.get('window').height),
             gameState: [
                 [0, 0, 0],
                 [0, 0, 0],
@@ -640,7 +642,12 @@ export default class Game extends Component {
                     </View>
 
                     {/* End of the Players' header and begin of the tiles */}
-
+                    {this.state.screenHeight > 600 ? (
+                        <View style={{ flex: 1 }} /> 
+                    ) : (
+                        <Fragment></Fragment>
+                    )}
+                           
                     <View style={{ flex: 13, flexShrink: 3 }}>
                         <View style={{ flexDirection: 'row' }}>
                             <TouchableOpacity onPress={() => this.props.gameMode === 'versus' ? this.onPressTileVersus(0, 0) : this.onPressTileAI(0, 0)} style={[(this.state.isDarkMode ? stylesDarkMode.tile : stylesLightMode.tile), { borderLeftWidth: 0, borderTopWidth: 0 }]}>
